@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalWire NYC — Hyperlocal Signal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Franklin:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0c0c0a;
+  --paper: #f2ede3;
+  --newsprint: #ddd5be;
+  --wire: #1c1c16;
+  --wire2: #252520;
+  --signal: #e8390e;
+  --signal-dim: #7a1e06;
+  --amber: #f0a500;
+  --teal: #1a8a78;
+  --muted: #6b6450;
+  --muted2: #888272;
+  --bk-blue: #003f87;
+  --bx-green: #1a6b2a;
+  --qns-orange: #c85a00;
+  --si-teal: #0a6060;
+  --mn-red: #c80000;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Libre Franklin', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.015) 3px,rgba(0,0,0,0.015) 4px);
+  pointer-events:none; z-index:9999;
+}
+
+/* ─── TICKER ─── */
+.ticker-bar {
+  background: var(--signal);
+  padding: 5px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  position: sticky; top:0; z-index:800;
+}
+.ticker-inner {
+  display: inline-block;
+  animation: scroll-ticker 40s linear infinite;
+}
+@keyframes scroll-ticker {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ─── MASTHEAD ─── */
+.masthead {
+  background: var(--ink);
+  border-bottom: 3px double var(--signal);
+  padding: 18px 32px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+.mast-meta { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); line-height:1.9; }
+.mast-meta strong { color: var(--amber); }
+.logo-block { text-align:center; }
+.logo-main {
+  font-family:'Playfair Display',serif;
+  font-size:56px; font-weight:900;
+  letter-spacing:-3px; line-height:1;
+  color: var(--paper);
+  text-shadow: 4px 4px 0 var(--signal), -1px -1px 0 #000;
+}
+.logo-sub {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:0.25em;
+  color: var(--muted2);
+  text-transform:uppercase;
+  margin-top:3px;
+}
+.mast-right { text-align:right; }
+.weather-widget {
+  background: var(--wire);
+  border:1px solid #2a2a1e;
+  border-radius:3px;
+  padding:8px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  display:inline-flex; align-items:center; gap:10px;
+}
+.weather-temp { font-size:22px; font-weight:600; color:var(--paper); }
+.weather-detail { font-size:10px; color:var(--muted2); line-height:1.6; }
+
+/* ─── ZONE NAV ─── */
+.zone-bar {
+  background: var(--wire);
+  border-bottom: 1px solid #222;
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+  align-items: center;
+  overflow-x: auto;
+}
+.zone-btn {
+  background:none; border:none;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding: 11px 16px;
+  cursor:pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  white-space:nowrap;
+  display:flex; align-items:center; gap:5px;
+  color: var(--muted2);
+}
+.zone-btn:hover { color:var(--paper); }
+.zone-btn.active { color:var(--paper); border-bottom-color:var(--signal); }
+.zone-btn.boro-mn { color:#ff6b6b; }
+.zone-btn.boro-bk { color:#6baaff; }
+.zone-btn.boro-qns { color:#ffb86b; }
+.zone-btn.boro-bx { color:#6bffaa; }
+.zone-btn.boro-si { color:#cc6bff; }
+.zone-btn.active.boro-mn { border-bottom-color:#ff6b6b; }
+.zone-btn.active.boro-bk { border-bottom-color:#6baaff; }
+.zone-btn.active.boro-qns { border-bottom-color:#ffb86b; }
+.zone-btn.active.boro-bx { border-bottom-color:#6bffaa; }
+.zone-btn.active.boro-si { border-bottom-color:#cc6bff; }
+
+/* ─── FORMAT NAV ─── */
+.format-bar {
+  background: var(--ink);
+  border-bottom: 1px solid #1a1a14;
+  padding: 0 32px;
+  display:flex; gap:0;
+  overflow-x:auto;
+}
+.fmt-btn {
+  background:none; border:none;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding: 8px 14px;
+  cursor:pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space:nowrap;
+}
+.fmt-btn:hover { color:var(--muted2); }
+.fmt-btn.active { color:var(--amber); border-bottom-color:var(--amber); }
+
+/* ─── LAYOUT ─── */
+.shell {
+  display:grid;
+  grid-template-columns: 220px 1fr 300px;
+  max-width:1400px;
+  margin:0 auto;
+  min-height: calc(100vh - 120px);
+}
+
+/* ─── LEFT SIDEBAR ─── */
+.left-col {
+  border-right:1px solid #191914;
+  padding:20px 16px;
+  position:sticky; top:60px;
+  height:calc(100vh - 60px);
+  overflow-y:auto;
+}
+.sb-label {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--signal);
+  margin-bottom:10px; padding-bottom:5px;
+  border-bottom:1px solid var(--wire2);
+  display:flex; align-items:center; gap:6px;
+}
+.sb-label .dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.hood-item {
+  display:flex; align-items:center; gap:8px;
+  padding:6px 8px; border-radius:2px;
+  cursor:pointer; transition:background 0.12s;
+  font-size:12px; color:var(--muted2);
+  border-left:2px solid transparent;
+  margin-bottom:1px;
+}
+.hood-item:hover { background:var(--wire); color:var(--paper); }
+.hood-item.active { background:var(--wire); color:var(--paper); border-left-color:var(--signal); }
+.hood-badge {
+  margin-left:auto;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:var(--amber);
+  background:rgba(240,165,0,0.1);
+  padding:1px 4px; border-radius:1px;
+}
+.sb-section { margin-bottom:22px; }
+
+/* ─── MAIN FEED ─── */
+.feed-col { border-right:1px solid #191914; }
+.feed-hdr {
+  padding:16px 24px;
+  border-bottom:1px solid #191914;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:60px; z-index:100;
+  background:var(--ink);
+  backdrop-filter:blur(10px);
+}
+.feed-zone-title {
+  font-family:'Playfair Display',serif;
+  font-size:20px; font-style:italic; font-weight:700;
+}
+.feed-count {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; color:var(--muted);
+}
+.broadcast-btn {
+  background:var(--signal); color:white; border:none;
+  padding:7px 14px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px;
+  letter-spacing:0.08em; text-transform:uppercase;
+  cursor:pointer; border-radius:2px;
+  transition:all 0.15s;
+}
+.broadcast-btn:hover { background:#c0300c; transform:translateY(-1px); }
+
+/* ─── CARDS ─── */
+.card {
+  border-bottom:1px solid #161611;
+  padding:20px 24px;
+  position:relative;
+  transition:background 0.12s;
+  cursor:pointer;
+}
+.card::before {
+  content:''; position:absolute;
+  left:0;top:0;bottom:0;width:3px;
+  background:transparent; transition:background 0.12s;
+}
+.card:hover { background:rgba(255,255,255,0.015); }
+.card:hover::before { background:var(--signal); }
+
+.card-top {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:8px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; color:var(--muted);
+  flex-wrap:wrap;
+}
+.tag {
+  padding:2px 6px; border-radius:1px;
+  font-size:9px; letter-spacing:0.08em; text-transform:uppercase;
+  border:1px solid currentColor;
+}
+.tag-video { color:var(--signal); }
+.tag-audio { color:var(--amber); }
+.tag-article { color:var(--teal); }
+.tag-photo { color:#9b7fe8; }
+.tag-tiktok { color:#69C9D0; }
+.tag-youtube { color:#FF0000; }
+.tag-spotify { color:#1DB954; }
+.tag-reddit { color:#FF4500; }
+.tag-breaking {
+  background:var(--signal); color:white; border:none;
+  animation:blink 1.2s step-end infinite;
+  font-size:9px; padding:2px 6px; border-radius:1px;
+  letter-spacing:0.1em; text-transform:uppercase;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+.hood-pill {
+  background:var(--wire2); color:var(--muted2);
+  padding:2px 6px; border-radius:10px; font-size:9px;
+}
+
+.card-hl {
+  font-family:'Playfair Display',serif;
+  font-size:17px; font-weight:700; line-height:1.3;
+  color:var(--paper); margin-bottom:6px;
+}
+.card-deck {
+  font-size:12px; color:var(--muted2); line-height:1.65;
+  margin-bottom:12px;
+}
+
+/* EMBED CONTAINERS */
+.embed-wrap {
+  border-radius:4px; overflow:hidden;
+  margin-bottom:12px;
+  background:var(--wire);
+  border:1px solid #222;
+  position:relative;
+}
+.embed-wrap iframe {
+  display:block; width:100%;
+  border:none;
+}
+.embed-label {
+  position:absolute; top:8px; left:8px;
+  background:rgba(0,0,0,0.75);
+  color:white; font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:0.08em;
+  padding:3px 7px; border-radius:2px;
+  text-transform:uppercase;
+  display:flex; align-items:center; gap:4px;
+  pointer-events:none; z-index:10;
+}
+
+/* TikTok embed override */
+.tiktok-wrap {
+  display:flex; justify-content:center;
+  background:#000; padding:0;
+  min-height:480px;
+}
+.tiktok-wrap blockquote { margin:0; }
+
+/* YouTube */
+.yt-wrap { aspect-ratio:16/9; background:#000; }
+.yt-wrap iframe { height:100%; }
+
+/* Spotify */
+.spotify-wrap { background:#000; }
+
+/* Pinterest */
+.pin-wrap { background:#fff; border-radius:4px; }
+
+/* Reddit widget */
+.reddit-card {
+  background: linear-gradient(135deg, #1a1a14, #1f1a14);
+  border:1px solid #2a2a1e;
+  border-radius:4px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.reddit-header {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:10px;
+}
+.reddit-icon { font-size:16px; }
+.reddit-sub {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px; color:#FF4500; font-weight:600;
+}
+.reddit-post {
+  padding:8px 0;
+  border-bottom:1px solid #2a2a1e;
+  cursor:pointer;
+}
+.reddit-post:last-child { border-bottom:none; }
+.reddit-post-title {
+  font-size:12px; color:var(--paper);
+  font-weight:600; margin-bottom:3px; line-height:1.4;
+}
+.reddit-post-meta {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:var(--muted);
+  display:flex; gap:10px;
+}
+
+/* Card actions */
+.card-actions {
+  display:flex; gap:14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; color:var(--muted);
+  flex-wrap:wrap;
+}
+.act { background:none; border:none; color:inherit; cursor:pointer; font:inherit; display:flex; align-items:center; gap:3px; padding:0; transition:color 0.12s; }
+.act:hover { color:var(--signal); }
+.act.boosted { color:var(--amber); }
+
+/* Open Data widget */
+.opendata-row {
+  display:flex; align-items:center; gap:8px;
+  padding:6px 0; border-bottom:1px solid #1a1a14;
+  font-size:11px;
+}
+.opendata-num {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px; font-weight:600; color:var(--amber);
+  min-width:40px;
+}
+.opendata-label { color:var(--muted2); font-size:11px; }
+
+/* ─── RIGHT SIDEBAR ─── */
+.right-col {
+  padding:20px 16px;
+  position:sticky; top:60px;
+  height:calc(100vh - 60px);
+  overflow-y:auto;
+}
+.widget { margin-bottom:22px; }
+.w-title {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:10px;
+  padding-bottom:5px; border-bottom:1px solid var(--wire2);
+}
+
+/* NYC Map zones */
+.nyc-map {
+  background:var(--wire);
+  border:1px solid #2a2a1e;
+  border-radius:3px;
+  padding:12px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.boro-list { display:flex; flex-direction:column; gap:5px; }
+.boro-row {
+  display:flex; align-items:center; gap:8px;
+  padding:6px 8px; border-radius:2px; cursor:pointer;
+  transition:background 0.12s;
+}
+.boro-row:hover { background:#252520; }
+.boro-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.boro-name { font-size:11px; color:var(--paper); font-weight:500; }
+.boro-count { margin-left:auto; font-size:9px; color:var(--muted); }
+.boro-bar {
+  height:3px; border-radius:1px;
+  margin-top:3px; transition:width 0.5s ease;
+}
+
+/* Trending */
+.trend-item {
+  display:flex; gap:8px; padding:7px 0;
+  border-bottom:1px solid #161611; cursor:pointer;
+}
+.trend-n {
+  font-family:'Playfair Display',serif;
+  font-size:18px; font-weight:900; color:var(--wire2);
+  line-height:1; min-width:20px;
+}
+.trend-n.hot { color:var(--signal); }
+.trend-topic { font-size:12px; font-weight:600; color:var(--paper); margin-bottom:2px; line-height:1.3; }
+.trend-meta { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--muted); }
+
+/* Live reporters */
+.rep-row { display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; }
+.rep-av {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--wire2); border:2px solid var(--teal);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; position:relative; flex-shrink:0;
+}
+.rep-live {
+  position:absolute; bottom:-1px; right:-1px;
+  width:8px; height:8px; background:var(--signal);
+  border-radius:50%; border:1px solid var(--ink);
+  animation:pulse 1s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.rep-name { font-size:12px; font-weight:600; color:var(--paper); }
+.rep-beat { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--muted); }
+
+/* ─── SECTION DIVIDER ─── */
+.section-divider {
+  text-align:center; padding:10px 0 5px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid #161611;
+  margin: 0 24px;
+}
+
+/* ─── COMPOSE MODAL ─── */
+.modal-bg {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.88); z-index:2000;
+  align-items:center; justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-bg.open { display:flex; }
+.modal-box {
+  background:#111108;
+  border:1px solid #2a2a1e; border-top:3px solid var(--signal);
+  width:580px; max-width:95vw; border-radius:4px;
+  padding:26px; position:relative;
+  animation:slideUp 0.2s ease-out;
+}
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; font-style:italic; margin-bottom:3px; }
+.modal-sub { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:18px; }
+.close-btn { position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; }
+.close-btn:hover { color:var(--paper); }
+.fmt-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:16px; }
+.fmt-pick {
+  background:var(--wire2); border:1px solid #2a2a1e;
+  color:var(--muted2); padding:8px 6px; border-radius:2px;
+  cursor:pointer; text-align:center;
+  font-family:'IBM Plex Mono',monospace; font-size:10px;
+  transition:all 0.12s;
+}
+.fmt-pick span { display:block; font-size:18px; margin-bottom:3px; }
+.fmt-pick:hover, .fmt-pick.sel { border-color:var(--signal); color:var(--signal); background:rgba(232,57,14,0.08); }
+.compose-ta {
+  width:100%; background:var(--wire2);
+  border:1px solid #2a2a1e; color:var(--paper);
+  font-family:'Libre Franklin',sans-serif; font-size:13px;
+  line-height:1.7; padding:10px 12px; border-radius:2px;
+  resize:vertical; min-height:90px; outline:none;
+  transition:border-color 0.12s;
+}
+.compose-ta:focus { border-color:var(--signal); }
+.compose-ta::placeholder { color:var(--muted); }
+.modal-foot { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+.radius-sel { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.radius-sel select { background:var(--wire2); border:1px solid #2a2a1e; color:var(--paper); padding:3px 7px; font-family:inherit; font-size:10px; border-radius:2px; outline:none; cursor:pointer; }
+.tx-btn { background:var(--signal); color:white; border:none; padding:9px 20px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.12s; }
+.tx-btn:hover { background:#c0300c; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:3px; height:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--wire2); border-radius:2px; }
+
+/* mobile */
+@media(max-width:900px){
+  .shell { grid-template-columns:1fr; }
+  .left-col, .right-col { display:none; }
+  .masthead { grid-template-columns:1fr; padding:12px 16px; }
+  .mast-meta, .mast-right { display:none; }
+  .card, .feed-hdr { padding-left:16px; padding-right:16px; }
+  .zone-bar, .format-bar { padding:0 8px; }
+}
+
+/* Loading spinner */
+.loading {
+  text-align:center; padding:30px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px; color:var(--muted);
+  letter-spacing:0.1em;
+}
+.spinner {
+  width:20px; height:20px; border:2px solid var(--wire2);
+  border-top-color:var(--signal); border-radius:50%;
+  animation:spin 0.7s linear infinite; display:inline-block;
+  margin-bottom:8px;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* Neighborhood selector dropdown */
+.hood-dropdown {
+  display:none; position:absolute;
+  background:var(--wire);
+  border:1px solid #2a2a1e; border-radius:3px;
+  padding:6px 0; z-index:500;
+  min-width:180px; max-height:300px; overflow-y:auto;
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+.hood-dropdown.open { display:block; }
+.hood-dd-item {
+  padding:7px 14px; cursor:pointer;
+  font-size:12px; color:var(--muted2);
+  transition:background 0.1s;
+  display:flex; align-items:center; gap:6px;
+}
+.hood-dd-item:hover { background:var(--wire2); color:var(--paper); }
+
+/* Live dot */
+.live-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--signal); display:inline-block;
+  animation:pulse 1s infinite; margin-right:3px;
+}
+
+/* Source attribution */
+.src-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:var(--muted);
+  background:var(--wire2);
+  padding:2px 6px; border-radius:10px;
+  margin-left:auto;
+}
+
+/* NYC Open Data panel */
+.opendata-panel {
+  background: linear-gradient(135deg, #111108, #141410);
+  border:1px solid #2a2a1e; border-radius:3px; padding:12px;
+}
+.opendata-header {
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:10px;
+}
+.opendata-icon { font-size:16px; }
+.opendata-title { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--teal); letter-spacing:0.1em; text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <span class="ticker-inner" id="tickerText">
+    🔴 LIVE: MTA G train delays reported between Court Sq and Bedford-Nostrand — signal issue at Greenpoint Ave &nbsp;·&nbsp; 
+    🗳️ Brooklyn CB 6 meeting tonight 7pm — agenda: Atlantic Yards Phase 2 &nbsp;·&nbsp;
+    🌡️ NYC Health Dept warns of heat advisory through Thursday &nbsp;·&nbsp;
+    📸 Jackson Heights mural project begins at 74th & Roosevelt Ave &nbsp;·&nbsp;
+    🎙️ Podcast: Hell Gate Media covers Rikers closure timeline — ep. 31 live &nbsp;·&nbsp;
+    📰 WNYC: City budget gap widens — mayor proposes agency cuts &nbsp;·&nbsp;
+    🚨 BREAKING: Harlem gas explosion at 129th St — FDNY on scene &nbsp;·&nbsp;
+    🏗️ SoHo rezoning vote pushed to April — community board demands EIS
+  </span>
+</div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="mast-meta">
+    <span>WEDNESDAY, MARCH 18, 2026</span>
+    <span>EDITION <strong>NYC-247</strong></span>
+    <span>5 BOROUGHS · 74 ACTIVE ZONES</span>
+    <span><strong style="color:var(--signal);">●</strong> 3,841 CONTRIBUTORS</span>
+  </div>
+  <div class="logo-block">
+    <div class="logo-main">LocalWire</div>
+    <div class="logo-sub">New York City · Hyperlocal Signal Network</div>
+  </div>
+  <div class="mast-right">
+    <div class="weather-widget" id="weatherWidget">
+      <div>🌆</div>
+      <div class="weather-temp" id="wTemp">–°F</div>
+      <div class="weather-detail" id="wDetail">Loading NYC<br>weather...</div>
+    </div>
+    <div style="margin-top:8px; text-align:right;">
+      <button class="broadcast-btn" onclick="openModal()">+ Broadcast</button>
+    </div>
+  </div>
+</header>
+
+<!-- ZONE NAV: BOROUGHS -->
+<nav class="zone-bar" id="zoneBar">
+  <button class="zone-btn active" onclick="setZone(this,'nyc')" data-zone="nyc">📡 All NYC</button>
+  <button class="zone-btn boro-mn" onclick="setZone(this,'manhattan')" data-zone="manhattan">🟥 Manhattan</button>
+  <button class="zone-btn boro-bk" onclick="setZone(this,'brooklyn')" data-zone="brooklyn">🟦 Brooklyn</button>
+  <button class="zone-btn boro-qns" onclick="setZone(this,'queens')" data-zone="queens">🟧 Queens</button>
+  <button class="zone-btn boro-bx" onclick="setZone(this,'bronx')" data-zone="bronx">🟩 The Bronx</button>
+  <button class="zone-btn boro-si" onclick="setZone(this,'staten')" data-zone="staten">🟪 Staten Island</button>
+  <div style="width:1px; background:#2a2a1e; margin:8px 4px;"></div>
+  <button class="zone-btn" style="position:relative;" onclick="toggleHoodDropdown(this)" id="hoodBtn">
+    📍 Neighborhood ▾
+    <div class="hood-dropdown" id="hoodDropdown">
+      <div class="hood-dd-item" onclick="selectHood('Harlem')">🟥 Harlem</div>
+      <div class="hood-dd-item" onclick="selectHood('East Village')">🟥 East Village</div>
+      <div class="hood-dd-item" onclick="selectHood('Washington Heights')">🟥 Washington Heights</div>
+      <div class="hood-dd-item" onclick="selectHood('Astoria')">🟧 Astoria</div>
+      <div class="hood-dd-item" onclick="selectHood('Jackson Heights')">🟧 Jackson Heights</div>
+      <div class="hood-dd-item" onclick="selectHood('Flushing')">🟧 Flushing</div>
+      <div class="hood-dd-item" onclick="selectHood('Williamsburg')">🟦 Williamsburg</div>
+      <div class="hood-dd-item" onclick="selectHood('Crown Heights')">🟦 Crown Heights</div>
+      <div class="hood-dd-item" onclick="selectHood('Flatbush')">🟦 Flatbush</div>
+      <div class="hood-dd-item" onclick="selectHood('Fordham')">🟩 Fordham</div>
+      <div class="hood-dd-item" onclick="selectHood('Mott Haven')">🟩 Mott Haven</div>
+      <div class="hood-dd-item" onclick="selectHood('St. George')">🟪 St. George</div>
+    </div>
+  </button>
+</nav>
+
+<!-- FORMAT BAR -->
+<div class="format-bar">
+  <button class="fmt-btn active" onclick="setFmt(this,'all')">All Signals</button>
+  <button class="fmt-btn" onclick="setFmt(this,'video')">🎥 TikTok/Video</button>
+  <button class="fmt-btn" onclick="setFmt(this,'podcast')">🎙️ Podcasts</button>
+  <button class="fmt-btn" onclick="setFmt(this,'youtube')">▶️ YouTube</button>
+  <button class="fmt-btn" onclick="setFmt(this,'article')">📰 Long-form</button>
+  <button class="fmt-btn" onclick="setFmt(this,'photo')">📸 Photoboard</button>
+  <button class="fmt-btn" onclick="setFmt(this,'reddit')">💬 Community</button>
+  <button class="fmt-btn" onclick="setFmt(this,'data')">📊 Open Data</button>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+
+  <!-- LEFT: NEIGHBORHOOD SIDEBAR -->
+  <aside class="left-col">
+    <div class="sb-section">
+      <div class="sb-label"><span class="dot"></span>Manhattan</div>
+      <div class="hood-item active" onclick="selectHood('Harlem')">Harlem <span class="hood-badge">12</span></div>
+      <div class="hood-item" onclick="selectHood('East Village')">East Village <span class="hood-badge">8</span></div>
+      <div class="hood-item" onclick="selectHood('Washington Heights')">Washington Heights <span class="hood-badge">5</span></div>
+      <div class="hood-item" onclick="selectHood('Upper West Side')">Upper West Side <span class="hood-badge">3</span></div>
+      <div class="hood-item" onclick="selectHood('Lower East Side')">Lower East Side <span class="hood-badge">7</span></div>
+      <div class="hood-item" onclick="selectHood('Inwood')">Inwood <span class="hood-badge">2</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label" style="color:#6baaff;"><span class="dot" style="background:#6baaff;"></span>Brooklyn</div>
+      <div class="hood-item" onclick="selectHood('Williamsburg')">Williamsburg <span class="hood-badge">15</span></div>
+      <div class="hood-item" onclick="selectHood('Crown Heights')">Crown Heights <span class="hood-badge">9</span></div>
+      <div class="hood-item" onclick="selectHood('Flatbush')">Flatbush <span class="hood-badge">6</span></div>
+      <div class="hood-item" onclick="selectHood('Bed-Stuy')">Bed-Stuy <span class="hood-badge">11</span></div>
+      <div class="hood-item" onclick="selectHood('Sunset Park')">Sunset Park <span class="hood-badge">4</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label" style="color:#ffb86b;"><span class="dot" style="background:#ffb86b;"></span>Queens</div>
+      <div class="hood-item" onclick="selectHood('Astoria')">Astoria <span class="hood-badge">7</span></div>
+      <div class="hood-item" onclick="selectHood('Jackson Heights')">Jackson Heights <span class="hood-badge">10</span></div>
+      <div class="hood-item" onclick="selectHood('Flushing')">Flushing <span class="hood-badge">8</span></div>
+      <div class="hood-item" onclick="selectHood('Jamaica')">Jamaica <span class="hood-badge">4</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label" style="color:#6bffaa;"><span class="dot" style="background:#6bffaa;"></span>The Bronx</div>
+      <div class="hood-item" onclick="selectHood('Fordham')">Fordham <span class="hood-badge">5</span></div>
+      <div class="hood-item" onclick="selectHood('Mott Haven')">Mott Haven <span class="hood-badge">6</span></div>
+      <div class="hood-item" onclick="selectHood('Tremont')">Tremont <span class="hood-badge">3</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN FEED -->
+  <main class="feed-col" id="mainFeed">
+    <div class="feed-hdr">
+      <div>
+        <div class="feed-zone-title" id="feedTitle">All NYC Signal Feed</div>
+        <div class="feed-count" id="feedCount"><span class="live-dot"></span> 247 stories · updating live</div>
+      </div>
+    </div>
+
+    <!-- ── CARD 1: TikTok NYC Breaking ── -->
+    <div class="card" data-fmt="video" data-zone="brooklyn">
+      <div class="card-top">
+        <span class="tag tag-tiktok">TikTok</span>
+        <span class="tag-breaking">Breaking</span>
+        <span class="hood-pill">🟦 Brooklyn</span>
+        <span>·</span>
+        <span>22 min ago</span>
+        <span class="src-badge">📲 @bklynreports</span>
+      </div>
+      <div class="card-hl">Atlantic Yards Protesters Block Flatbush Ave — Developer's Trucks Turned Back</div>
+      <div class="card-deck">Dozens of community members blocked construction equipment near the arena site. Video from the ground shows protesters linking arms across Flatbush Avenue.</div>
+      <div class="embed-wrap tiktok-wrap" style="max-height:560px; overflow:hidden;">
+        <div class="embed-label">🎵 TikTok</div>
+        <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@nyc_street_reports/video/7321234567890123456"
+          data-video-id="7321234567890123456" style="max-width:605px; min-width:325px;">
+          <section>
+            <!-- TikTok fallback display when embed not available -->
+            <div style="background:linear-gradient(135deg,#010101,#1a1a1a);padding:40px 20px;text-align:center;color:#fff;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:4px;">
+              <div style="font-size:48px;">🎵</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#69C9D0;letter-spacing:0.1em;text-transform:uppercase;">TikTok · @nyc_street_reports</div>
+              <div style="font-size:14px;color:#ccc;max-width:300px;line-height:1.5;">Brooklyn protest coverage — Atlantic Yards construction blocked by community members</div>
+              <a href="https://www.tiktok.com/search?q=NYC+local+news+brooklyn" target="_blank" 
+                style="background:#69C9D0;color:#000;padding:8px 18px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;margin-top:8px;">
+                Watch on TikTok →
+              </a>
+            </div>
+          </section>
+        </blockquote>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 312 re-signals</button>
+        <button class="act">💬 84 replies</button>
+        <button class="act boosted">⚡ 1,240 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 2: YouTube — Local Journalism ── -->
+    <div class="card" data-fmt="youtube" data-zone="manhattan">
+      <div class="card-top">
+        <span class="tag tag-youtube">YouTube</span>
+        <span class="hood-pill">🟥 Harlem</span>
+        <span>·</span>
+        <span>1 hr ago</span>
+        <span class="src-badge">▶️ Documented NY</span>
+      </div>
+      <div class="card-hl">Harlem Rent Strike: Tenants at 409 Edgecombe Speak Out After 6 Months Without Heat</div>
+      <div class="card-deck">Award-winning documentary team Documented NY filed this 12-minute report. Residents of the historic building describe conditions and their organizing strategy.</div>
+      <div class="embed-wrap yt-wrap">
+        <div class="embed-label">▶️ YouTube</div>
+        <iframe 
+          src="https://www.youtube.com/embed/yMIAFIZxDFU?rel=0&modestbranding=1" 
+          title="NYC Local News - Harlem Housing Report"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="width:100%;height:100%;">
+        </iframe>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 178 re-signals</button>
+        <button class="act">💬 42 replies</button>
+        <button class="act">⚡ 634 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 3: Spotify Podcast ── -->
+    <div class="card" data-fmt="podcast" data-zone="nyc">
+      <div class="card-top">
+        <span class="tag tag-spotify">Spotify</span>
+        <span class="hood-pill">📡 NYC-Wide</span>
+        <span>·</span>
+        <span>3 hrs ago</span>
+        <span class="src-badge">🎙️ Hell Gate Media</span>
+      </div>
+      <div class="card-hl">Hell Gate Ep. 31: The Rikers Closure Timeline Nobody Talks About</div>
+      <div class="card-deck">Hell Gate Media — NYC's independent newsroom — breaks down the political stall behind the jail closure mandate. Guests include advocates, a former correction officer, and a city council member.</div>
+      <div class="embed-wrap spotify-wrap">
+        <div class="embed-label">🎵 Spotify</div>
+        <iframe 
+          style="border-radius:4px" 
+          src="https://open.spotify.com/embed/episode/6rqhFgbbKwnb9MLmUQDhf6?utm_source=generator&theme=0" 
+          width="100%" 
+          height="152" 
+          frameBorder="0" 
+          allowfullscreen="" 
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+          loading="lazy">
+        </iframe>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 94 re-signals</button>
+        <button class="act">💬 31 replies</button>
+        <button class="act">⚡ 287 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 4: Spotify Podcast 2 ── -->
+    <div class="card" data-fmt="podcast" data-zone="brooklyn">
+      <div class="card-top">
+        <span class="tag tag-spotify">Spotify</span>
+        <span class="hood-pill">🟦 Crown Heights</span>
+        <span>·</span>
+        <span>5 hrs ago</span>
+        <span class="src-badge">🎙️ The Gothamist Pod</span>
+      </div>
+      <div class="card-hl">Crown Heights Caribbean Day Parade Funding Cut — What Happened and Who's to Blame</div>
+      <div class="card-deck">WNYC / Gothamist investigates the sudden withdrawal of city funding from one of Brooklyn's most beloved annual celebrations. Community leaders respond.</div>
+      <div class="embed-wrap spotify-wrap">
+        <div class="embed-label">🎵 Spotify</div>
+        <iframe 
+          style="border-radius:4px" 
+          src="https://open.spotify.com/embed/show/3RENOd3q73RIe94VLF2P7E?utm_source=generator&theme=0" 
+          width="100%" 
+          height="152" 
+          frameBorder="0" 
+          allowfullscreen="" 
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+          loading="lazy">
+        </iframe>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 67 re-signals</button>
+        <button class="act">💬 25 replies</button>
+        <button class="act boosted">⚡ 198 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <div class="section-divider">── Photo & Visual Journalism ──</div>
+
+    <!-- ── CARD 5: Pinterest-style Photo ── -->
+    <div class="card" data-fmt="photo" data-zone="queens">
+      <div class="card-top">
+        <span class="tag tag-photo">Photo Essay</span>
+        <span class="hood-pill">🟧 Jackson Heights</span>
+        <span>·</span>
+        <span>Today</span>
+        <span class="src-badge">📌 Visual Story</span>
+      </div>
+      <div class="card-hl">74th Street: A Block That Contains Multitudes — 24 Hours, 24 Cultures</div>
+      <div class="card-deck">A dawn-to-midnight photographic diary of the most diverse street in the world. Street food, barbershops, puja ceremonies, soccer commentary, and midnight deliveries.</div>
+      <!-- Pinterest board embed via widget -->
+      <div class="embed-wrap pin-wrap" style="min-height:320px;">
+        <div class="embed-label" style="color:#000;">📌 Pinterest</div>
+        <a data-pin-do="embedBoard" data-pin-board-width="100%" data-pin-scale-height="320" data-pin-scale-width="80"
+          href="https://www.pinterest.com/nycstreetphotography/jackson-heights-nyc/">
+        </a>
+        <!-- Pinterest fallback -->
+        <div id="pinFallback" style="background:linear-gradient(135deg,#fff8f8,#fff0f0);padding:20px;min-height:300px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;justify-content:center;">
+          <div style="text-align:center;width:100%;padding:20px 0 10px;">
+            <div style="font-size:32px;margin-bottom:8px;">📌</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#E60023;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Pinterest · NYC Street Photography</div>
+            <div style="font-size:13px;color:#666;margin-bottom:14px;">74th Street, Jackson Heights Photo Essay</div>
+            <a href="https://www.pinterest.com/search/pins/?q=jackson+heights+nyc+street+photography" target="_blank"
+              style="background:#E60023;color:white;padding:8px 18px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;">
+              View on Pinterest →
+            </a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;padding:0 8px 8px;">
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#f4a460,#8B4513);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🍛</div>
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#228B22,#90EE90);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🌺</div>
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#4169E1,#87CEEB);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🎭</div>
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#FF6347,#FFD700);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🥙</div>
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#800080,#DDA0DD);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🎪</div>
+            <div style="aspect-ratio:1;background:linear-gradient(135deg,#2F4F4F,#008080);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;">🏪</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 231 re-signals</button>
+        <button class="act">💬 67 replies</button>
+        <button class="act boosted">⚡ 892 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 6: YouTube — Bronx ── -->
+    <div class="card" data-fmt="youtube" data-zone="bronx">
+      <div class="card-top">
+        <span class="tag tag-youtube">YouTube</span>
+        <span class="hood-pill">🟩 Mott Haven</span>
+        <span>·</span>
+        <span>Yesterday</span>
+        <span class="src-badge">▶️ NY1</span>
+      </div>
+      <div class="card-hl">South Bronx Air Quality Crisis: Expressway Trucks and Childhood Asthma Rates</div>
+      <div class="card-deck">NY1 investigative team embedded with South Bronx residents fighting a decade-long battle over diesel emissions from the Bruckner/Cross Bronx corridor. Data, testimony, and a state official's response.</div>
+      <div class="embed-wrap yt-wrap">
+        <div class="embed-label">▶️ YouTube</div>
+        <iframe 
+          src="https://www.youtube.com/embed/eWxm3WNCS8I?rel=0&modestbranding=1" 
+          title="South Bronx Air Quality"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="width:100%;height:100%;">
+        </iframe>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 145 re-signals</button>
+        <button class="act">💬 53 replies</button>
+        <button class="act">⚡ 423 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <div class="section-divider">── Community & Reddit ──</div>
+
+    <!-- ── CARD 7: Reddit ── -->
+    <div class="card" data-fmt="reddit" data-zone="nyc">
+      <div class="card-top">
+        <span class="tag tag-reddit">Reddit</span>
+        <span class="hood-pill">📡 NYC-Wide</span>
+        <span>·</span>
+        <span>2 hrs ago</span>
+        <span class="src-badge">💬 r/nyc</span>
+      </div>
+      <div class="card-hl">Top community threads from r/nyc, r/brooklyn, r/queens this hour</div>
+      <div class="reddit-card">
+        <div class="reddit-header">
+          <span class="reddit-icon">🟠</span>
+          <span class="reddit-sub">r/nyc · r/brooklyn · r/queens</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Live community threads</span>
+        </div>
+        <div class="reddit-post" onclick="window.open('https://reddit.com/r/nyc','_blank')">
+          <div class="reddit-post-title">Anyone else notice the G train has been 20+ min delays every single morning for 3 weeks? Is there a petition?</div>
+          <div class="reddit-post-meta"><span>⬆️ 2.4k</span><span>💬 312 comments</span><span>r/nyc</span></div>
+        </div>
+        <div class="reddit-post" onclick="window.open('https://reddit.com/r/brooklyn','_blank')">
+          <div class="reddit-post-title">Landlord entered without notice — third time this month. Brooklyn tenants: what are our actual legal options?</div>
+          <div class="reddit-post-meta"><span>⬆️ 1.8k</span><span>💬 245 comments</span><span>r/brooklyn</span></div>
+        </div>
+        <div class="reddit-post" onclick="window.open('https://reddit.com/r/queens','_blank')">
+          <div class="reddit-post-title">The new Flushing Meadows restoration plan dropped — here's what's actually in it (vs. the press release)</div>
+          <div class="reddit-post-meta"><span>⬆️ 3.1k</span><span>💬 178 comments</span><span>r/queens</span></div>
+        </div>
+        <div class="reddit-post" onclick="window.open('https://reddit.com/r/AskNYC','_blank')">
+          <div class="reddit-post-title">Why does every bodega in Crown Heights have a giant fan but no AC — historical zoning thing?</div>
+          <div class="reddit-post-meta"><span>⬆️ 892</span><span>💬 134 comments</span><span>r/AskNYC</span></div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="act" onclick="window.open('https://reddit.com/r/nyc','_blank')">🔗 Open r/nyc</button>
+        <button class="act" onclick="window.open('https://reddit.com/r/brooklyn','_blank')">🔗 r/brooklyn</button>
+        <button class="act" onclick="window.open('https://reddit.com/r/queens','_blank')">🔗 r/queens</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 8: NYC Open Data ── -->
+    <div class="card" data-fmt="data" data-zone="nyc">
+      <div class="card-top">
+        <span class="tag" style="color:var(--teal);">Open Data</span>
+        <span class="hood-pill">📊 NYC-Wide</span>
+        <span>·</span>
+        <span>Updated daily</span>
+        <span class="src-badge">🏙️ data.cityofnewyork.us</span>
+      </div>
+      <div class="card-hl">NYC Open Data Pulse — Live from data.cityofnewyork.us</div>
+      <div class="card-deck">Real-time public data streams from NYC government — 311 complaints, housing violations, noise reports, and more from your zone.</div>
+      <div class="opendata-panel" id="openDataPanel">
+        <div class="opendata-header">
+          <span class="opendata-icon">🏙️</span>
+          <span class="opendata-title">NYC Open Data · Today's Signal</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--teal);" id="odStatus">● Loading...</span>
+        </div>
+        <div id="openDataRows">
+          <div class="loading"><div class="spinner"></div><br>Pulling from NYC Open Data API...</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <a href="https://data.cityofnewyork.us" target="_blank" 
+          style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;letter-spacing:0.05em;">
+          → data.cityofnewyork.us ↗
+        </a>
+      </div>
+      <div class="card-actions" style="margin-top:10px;">
+        <button class="act">♻️ 56 re-signals</button>
+        <button class="act">💬 14 replies</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 9: TikTok NYC 2 ── -->
+    <div class="card" data-fmt="video" data-zone="queens">
+      <div class="card-top">
+        <span class="tag tag-tiktok">TikTok</span>
+        <span class="hood-pill">🟧 Astoria</span>
+        <span>·</span>
+        <span>4 hrs ago</span>
+        <span class="src-badge">📲 @astoriabuzz</span>
+      </div>
+      <div class="card-hl">Astoria Park Amphitheater: What the Parks Dept Isn't Telling You About the Renovation</div>
+      <div class="card-deck">A community journalist's TikTok documenting what was quietly approved in the Astoria Park master plan — and what community board members say they weren't shown.</div>
+      <div class="embed-wrap" style="background:#000;padding:20px;text-align:center;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+        <div style="font-size:40px;">🎵</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#69C9D0;">TikTok · @astoriabuzz</div>
+        <div style="font-size:12px;color:#aaa;max-width:280px;line-height:1.5;">Astoria Park renovation docs — what was approved vs. what was presented</div>
+        <a href="https://www.tiktok.com/search?q=astoria+park+nyc" target="_blank"
+          style="background:#69C9D0;color:#000;padding:7px 16px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+          Watch on TikTok →
+        </a>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 88 re-signals</button>
+        <button class="act">💬 31 replies</button>
+        <button class="act">⚡ 256 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+    <!-- ── CARD 10: WNYC / Gothamist ── -->
+    <div class="card" data-fmt="article" data-zone="manhattan">
+      <div class="card-top">
+        <span class="tag tag-article">Long-form</span>
+        <span class="hood-pill">🟥 Lower East Side</span>
+        <span>·</span>
+        <span>This morning</span>
+        <span class="src-badge">📰 Gothamist</span>
+      </div>
+      <div class="card-hl">The Last Rent-Stabilized Building on Delancey: A Year Inside the Battle</div>
+      <div class="card-deck">Gothamist spent 14 months inside 247 Delancey as the owner attempted to vacate the building through a series of escalating harassment tactics. A landmark tenant organizing story.</div>
+      <div style="background:linear-gradient(135deg,#111108,#1a1a10);border:1px solid #2a2a1e;border-radius:3px;padding:16px;margin-bottom:12px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);margin-bottom:8px;letter-spacing:0.08em;">📰 GOTHAMIST / WNYC</div>
+        <div style="font-size:13px;font-weight:600;color:var(--paper);margin-bottom:6px;line-height:1.4;">
+          "The owner filed 23 separate HP actions in 14 months. Tenants had to appear in housing court 23 times. They're still there."
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+          3,800-word investigation · Includes housing court records, HPD violation database analysis, and tenant interviews spanning 5 languages.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a href="https://gothamist.com" target="_blank" style="background:var(--teal);color:white;padding:6px 12px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-decoration:none;letter-spacing:0.06em;">Read Full Story →</a>
+          <a href="https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5" target="_blank" style="background:var(--wire2);color:var(--muted2);padding:6px 12px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-decoration:none;letter-spacing:0.06em;border:1px solid #333;">HPD Violation Data →</a>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="act">♻️ 421 re-signals</button>
+        <button class="act">💬 178 replies</button>
+        <button class="act boosted">⚡ 2,341 boosts</button>
+        <button class="act" style="margin-left:auto;">🔖</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="right-col">
+
+    <!-- NYC Borough Activity -->
+    <div class="widget">
+      <div class="w-title">Borough Activity</div>
+      <div class="nyc-map">
+        <div class="boro-list" id="boroList">
+          <div class="boro-row" onclick="setZoneDirect('manhattan')">
+            <div class="boro-dot" style="background:#ff6b6b;"></div>
+            <div>
+              <div class="boro-name">Manhattan</div>
+              <div class="boro-bar" style="width:75%;background:#ff6b6b;opacity:0.5;"></div>
+            </div>
+            <div class="boro-count">84 stories</div>
+          </div>
+          <div class="boro-row" onclick="setZoneDirect('brooklyn')">
+            <div class="boro-dot" style="background:#6baaff;"></div>
+            <div>
+              <div class="boro-name">Brooklyn</div>
+              <div class="boro-bar" style="width:90%;background:#6baaff;opacity:0.5;"></div>
+            </div>
+            <div class="boro-count">102 stories</div>
+          </div>
+          <div class="boro-row" onclick="setZoneDirect('queens')">
+            <div class="boro-dot" style="background:#ffb86b;"></div>
+            <div>
+              <div class="boro-name">Queens</div>
+              <div class="boro-bar" style="width:60%;background:#ffb86b;opacity:0.5;"></div>
+            </div>
+            <div class="boro-count">67 stories</div>
+          </div>
+          <div class="boro-row" onclick="setZoneDirect('bronx')">
+            <div class="boro-dot" style="background:#6bffaa;"></div>
+            <div>
+              <div class="boro-name">The Bronx</div>
+              <div class="boro-bar" style="width:45%;background:#6bffaa;opacity:0.5;"></div>
+            </div>
+            <div class="boro-count">51 stories</div>
+          </div>
+          <div class="boro-row" onclick="setZoneDirect('staten')">
+            <div class="boro-dot" style="background:#cc6bff;"></div>
+            <div>
+              <div class="boro-name">Staten Island</div>
+              <div class="boro-bar" style="width:20%;background:#cc6bff;opacity:0.5;"></div>
+            </div>
+            <div class="boro-count">22 stories</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trending NYC -->
+    <div class="widget">
+      <div class="w-title">Trending in NYC</div>
+      <div id="trendingList">
+        <div class="trend-item">
+          <div class="trend-n hot">1</div>
+          <div>
+            <div class="trend-topic">#AtlanticYards</div>
+            <div class="trend-meta">412 signals · Brooklyn</div>
+          </div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-n hot">2</div>
+          <div>
+            <div class="trend-topic">Rikers Closure</div>
+            <div class="trend-meta">284 signals · City-wide</div>
+          </div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-n">3</div>
+          <div>
+            <div class="trend-topic">G Train Delays</div>
+            <div class="trend-meta">231 signals · Brooklyn/Queens</div>
+          </div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-n">4</div>
+          <div>
+            <div class="trend-topic">Jackson Heights Mural</div>
+            <div class="trend-meta">178 signals · Queens</div>
+          </div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-n">5</div>
+          <div>
+            <div class="trend-topic">SoHo Rezoning</div>
+            <div class="trend-meta">156 signals · Manhattan</div>
+          </div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-n">6</div>
+          <div>
+            <div class="trend-topic">Bronx Air Quality</div>
+            <div class="trend-meta">143 signals · Bronx</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Reporters -->
+    <div class="widget">
+      <div class="w-title">On the Ground</div>
+      <div class="rep-row">
+        <div class="rep-av" style="border-color:var(--signal);">MO<div class="rep-live"></div></div>
+        <div>
+          <div class="rep-name">Marcus Okafor</div>
+          <div class="rep-beat">📍 Atlantic Yards · Video</div>
+        </div>
+      </div>
+      <div class="rep-row">
+        <div class="rep-av" style="border-color:var(--amber);">LT<div class="rep-live"></div></div>
+        <div>
+          <div class="rep-name">Lorena Tran</div>
+          <div class="rep-beat">📍 Flushing · Audio</div>
+        </div>
+      </div>
+      <div class="rep-row">
+        <div class="rep-av" style="border-color:#9b7fe8;">RJ</div>
+        <div>
+          <div class="rep-name">Renata Jiménez</div>
+          <div class="rep-beat">📍 Jackson Heights · Photo</div>
+        </div>
+      </div>
+      <div class="rep-row">
+        <div class="rep-av" style="border-color:var(--teal);">SK</div>
+        <div>
+          <div class="rep-name">Soren Kim</div>
+          <div class="rep-beat">📍 Mott Haven · Longform</div>
+        </div>
+      </div>
+      <div class="rep-row">
+        <div class="rep-av" style="border-color:#6baaff;">DA<div class="rep-live"></div></div>
+        <div>
+          <div class="rep-name">Delia Achebe</div>
+          <div class="rep-beat">📍 Crown Heights · Video</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="widget">
+      <div class="w-title">NYC Journalism Sources</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <a href="https://gothamist.com" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;display:flex;justify-content:space-between;">Gothamist ↗ <span style="color:var(--muted);">WNYC</span></a>
+        <a href="https://hellgatenyc.com" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;display:flex;justify-content:space-between;">Hell Gate Media ↗ <span style="color:var(--muted);">Independent</span></a>
+        <a href="https://thecity.nyc" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;display:flex;justify-content:space-between;">THE CITY ↗ <span style="color:var(--muted);">Nonprofit</span></a>
+        <a href="https://www.documentedny.com" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;display:flex;justify-content:space-between;">Documented NY ↗ <span style="color:var(--muted);">Immigrant</span></a>
+        <a href="https://bklynr.com" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;display:flex;justify-content:space-between;">Bklyn Reader ↗ <span style="color:var(--muted);">Brooklyn</span></div>
+        <a href="https://data.cityofnewyork.us" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;display:flex;justify-content:space-between;">NYC Open Data ↗ <span style="color:var(--muted);">City Gov</span></a>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- COMPOSE MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-title">Broadcast to NYC</div>
+    <div class="modal-sub" id="modalSub">CURRENT ZONE: ALL NYC · HYPERLOCAL SIGNAL NETWORK</div>
+    <div class="fmt-grid">
+      <button class="fmt-pick sel" onclick="selFmt(this)"><span>🎥</span>Short Video</button>
+      <button class="fmt-pick" onclick="selFmt(this)"><span>🎙️</span>Audio</button>
+      <button class="fmt-pick" onclick="selFmt(this)"><span>📸</span>Photos</button>
+      <button class="fmt-pick" onclick="selFmt(this)"><span>✍️</span>Long-form</button>
+    </div>
+    <textarea class="compose-ta" placeholder="What's happening in your zone? Be specific: intersection, building address, time, names. Hyperlocal journalism runs on details."></textarea>
+    <div class="modal-foot">
+      <div class="radius-sel">
+        📡 Radius:
+        <select>
+          <option>0.5mi — Block</option>
+          <option>1mi — Neighborhood</option>
+          <option selected>3mi — District</option>
+          <option>Borough-wide</option>
+          <option>City-wide</option>
+        </select>
+      </div>
+      <button class="tx-btn">📡 Transmit</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+// ── TikTok embed loader
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://www.tiktok.com/embed.js';
+  s.async = true;
+  document.head.appendChild(s);
+})();
+
+// ── Pinterest widget loader
+(function() {
+  var p = document.createElement('script');
+  p.src = 'https://assets.pinterest.com/js/pinit.js';
+  p.async = true;
+  p.defer = true;
+  document.head.appendChild(p);
+})();
+
+// ── Current zone state
+let currentZone = 'nyc';
+let currentFmt = 'all';
+let currentHood = null;
+
+// ── Zone nav
+function setZone(btn, zone) {
+  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentZone = zone;
+  currentHood = null;
+  updateFeedTitle();
+  filterCards();
+}
+
+function setZoneDirect(zone) {
+  currentZone = zone;
+  currentHood = null;
+  document.querySelectorAll('.zone-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.dataset.zone === zone) b.classList.add('active');
+  });
+  updateFeedTitle();
+  filterCards();
+}
+
+function toggleHoodDropdown(btn) {
+  const dd = document.getElementById('hoodDropdown');
+  dd.classList.toggle('open');
+  document.addEventListener('click', function closeDD(e) {
+    if (!btn.contains(e.target)) { dd.classList.remove('open'); document.removeEventListener('click', closeDD); }
+  });
+}
+
+function selectHood(hood) {
+  currentHood = hood;
+  currentZone = null;
+  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('hoodBtn').classList.add('active');
+  document.getElementById('hoodBtn').childNodes[0].textContent = '📍 ' + hood + ' ▾';
+  document.getElementById('hoodDropdown').classList.remove('open');
+  // Highlight sidebar
+  document.querySelectorAll('.hood-item').forEach(i => {
+    i.classList.toggle('active', i.textContent.trim().startsWith(hood));
+  });
+  updateFeedTitle();
+  filterCards();
+}
+
+function updateFeedTitle() {
+  const el = document.getElementById('feedTitle');
+  const cnt = document.getElementById('feedCount');
+  if (currentHood) {
+    el.textContent = currentHood + ' Signal';
+    cnt.innerHTML = '<span class="live-dot"></span> Neighborhood feed · live';
+  } else {
+    const names = {nyc:'All NYC Signal Feed',manhattan:'Manhattan Feed',brooklyn:'Brooklyn Feed',queens:'Queens Feed',bronx:'The Bronx Feed',staten:'Staten Island Feed'};
+    el.textContent = names[currentZone] || 'All NYC Signal Feed';
+    cnt.innerHTML = '<span class="live-dot"></span> ' + (currentZone === 'nyc' ? '247' : Math.floor(Math.random()*80+20)) + ' stories · updating live';
+  }
+}
+
+function filterCards() {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    const cardZone = card.dataset.zone;
+    const show = currentZone === 'nyc' || !currentZone || cardZone === currentZone || cardZone === 'nyc';
+    card.style.display = show ? '' : 'none';
+    if (currentFmt !== 'all') {
+      const cardFmt = card.dataset.fmt;
+      if (cardFmt !== currentFmt) card.style.display = 'none';
+    }
+  });
+}
+
+// ── Format filter
+function setFmt(btn, fmt) {
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFmt = fmt;
+  filterCards();
+}
+
+// ── Modal
+function openModal() {
+  document.getElementById('modalBg').classList.add('open');
+  const zone = currentHood || (currentZone === 'nyc' ? 'ALL NYC' : currentZone.toUpperCase());
+  document.getElementById('modalSub').textContent = 'ZONE: ' + zone + ' · LOCALWIRE HYPERLOCAL SIGNAL';
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+document.getElementById('modalBg').addEventListener('click', e => { if (e.target.id === 'modalBg') closeModal(); });
+
+function selFmt(btn) {
+  document.querySelectorAll('.fmt-pick').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+// ── NYC Weather via Open-Meteo (free, no key needed)
+async function loadWeather() {
+  try {
+    // NYC coords: 40.7128, -74.0060
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph');
+    const data = await res.json();
+    const w = data.current_weather;
+    const codes = {0:'☀️ Clear',1:'🌤 Mostly Clear',2:'⛅ Partly Cloudy',3:'☁️ Overcast',45:'🌫 Foggy',48:'🌫 Icy Fog',51:'🌦 Drizzle',61:'🌧 Rain',71:'🌨 Snow',80:'🌦 Showers',95:'⛈ Thunderstorm'};
+    const desc = codes[w.weathercode] || '🌡 Weather';
+    document.getElementById('wTemp').textContent = Math.round(w.temperature) + '°F';
+    document.getElementById('wDetail').innerHTML = desc + '<br>' + w.windspeed + ' mph winds<br><span style="color:var(--teal)">NYC NOW</span>';
+  } catch(e) {
+    document.getElementById('wDetail').innerHTML = 'NYC<br>Weather<br><span style="color:var(--muted)">unavailable</span>';
+  }
+}
+
+// ── NYC Open Data: 311 complaints (today, sample)
+async function loadOpenData() {
+  const panel = document.getElementById('openDataRows');
+  const status = document.getElementById('odStatus');
+  try {
+    // NYC 311 Open Data — today's top complaint types
+    const today = new Date().toISOString().split('T')[0];
+    const url = `https://data.cityofnewyork.us/resource/erm2-nwe9.json?$limit=5&$order=created_date+DESC&$where=created_date>'${today}'`;
+    const res = await fetch(url);
+    const data = await res.json();
+    status.textContent = '● Live';
+    status.style.color = 'var(--signal)';
+    if (data && data.length > 0) {
+      let html = '';
+      data.forEach(row => {
+        const time = row.created_date ? new Date(row.created_date).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '–';
+        const type = (row.complaint_type || 'Unknown').substring(0, 30);
+        const hood = (row.borough || '').replace('MANHATTAN','Manh.').replace('BROOKLYN','Bklyn').replace('QUEENS','Queens').replace('BRONX','Bronx').replace('STATEN ISLAND','S.I.');
+        html += `<div class="opendata-row">
+          <div class="opendata-num">${time}</div>
+          <div class="opendata-label">${type} · ${hood}</div>
+        </div>`;
+      });
+      html += `<div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Showing latest 5 of today's 311 complaints</div>`;
+      panel.innerHTML = html;
+    } else {
+      throw new Error('No data');
+    }
+  } catch(e) {
+    // Fallback with static sample data
+    status.textContent = '● Sample data';
+    status.style.color = 'var(--amber)';
+    panel.innerHTML = `
+      <div class="opendata-row"><div class="opendata-num">847</div><div class="opendata-label">Noise - Residential · Brooklyn</div></div>
+      <div class="opendata-row"><div class="opendata-num">612</div><div class="opendata-label">HEAT/HOT WATER complaints · Bronx</div></div>
+      <div class="opendata-row"><div class="opendata-num">398</div><div class="opendata-label">Blocked Driveway · Queens</div></div>
+      <div class="opendata-row"><div class="opendata-num">287</div><div class="opendata-label">Illegal Parking · Manhattan</div></div>
+      <div class="opendata-row"><div class="opendata-num">156</div><div class="opendata-label">Street Light Condition · Staten Island</div></div>
+      <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">
+        Sample: typical daily 311 volumes by type · 
+        <a href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9" target="_blank" style="color:var(--teal);">Live data ↗</a>
+      </div>`;
+  }
+}
+
+// ── Wikipedia neighborhood data (via REST API, no key needed)
+async function loadNeighborhoodData(hood) {
+  // Could load Wikipedia summaries for neighborhoods on demand
+}
+
+// ── Init
+loadWeather();
+loadOpenData();
+
+// ── Live ticker update simulation
+setInterval(() => {
+  const stories = [
+    '🔴 LIVE: MTA G train delays — signal issue at Greenpoint Ave',
+    '🗳️ Brooklyn CB 6 meeting tonight 7pm — Atlantic Yards Phase 2',
+    '🌡️ NYC Health Dept: heat advisory through Thursday',
+    '📸 Jackson Heights mural project begins at 74th & Roosevelt Ave',
+    '🎙️ Hell Gate Media: Rikers closure timeline — ep. 31 live now',
+    '🚨 BREAKING: Harlem gas explosion at 129th St — FDNY on scene',
+    '🏗️ SoHo rezoning vote pushed to April',
+    '📊 311 complaints up 12% in Astoria this week — noise/construction',
+    '🗺️ New Flushing Meadows restoration plan released — community reacts',
+    '🎥 Crown Heights Carnival funding controversy escalates',
+  ];
+}, 30000);
+
+// ── Boost buttons
+document.querySelectorAll('.act').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (this.textContent.includes('boosts')) {
+      this.classList.toggle('boosted');
+    }
+  });
+});
+</script>
+</body>
+</html>
