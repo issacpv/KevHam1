@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalWire NYC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Franklin:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0c0c0a; --paper:#f2ede3; --wire:#1c1c16; --wire2:#252520;
+  --signal:#e8390e; --amber:#f0a500; --teal:#1a8a78; --muted:#6b6450; --muted2:#999080;
+  --apple:#fa243c; --spotify:#1DB954; --iHeart:#c6002b; --pocket:#ef4056; --tt:#69C9D0; --ig:#e1306c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--ink);color:var(--paper);font-family:'Libre Franklin',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.012) 3px,rgba(0,0,0,0.012) 4px);pointer-events:none;z-index:9999;}
+
+/* TICKER */
+.ticker{background:var(--signal);padding:5px 0;overflow:hidden;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.07em;position:sticky;top:0;z-index:800;}
+.ticker-inner{display:inline-block;animation:ticker 45s linear infinite;}
+@keyframes ticker{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* MASTHEAD */
+.masthead{background:var(--ink);border-bottom:3px double var(--signal);padding:16px 28px 12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;}
+.mast-l{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);line-height:2;}
+.mast-l strong{color:var(--amber);}
+.logo{text-align:center;}
+.logo-word{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;letter-spacing:-3px;line-height:1;text-shadow:4px 4px 0 var(--signal),-1px -1px 0 #000;}
+.logo-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.25em;color:var(--muted2);margin-top:3px;text-transform:uppercase;}
+.mast-r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.weather-box{background:var(--wire);border:1px solid #2a2a1e;border-radius:3px;padding:7px 12px;font-family:'IBM Plex Mono',monospace;display:inline-flex;align-items:center;gap:10px;}
+.w-temp{font-size:22px;font-weight:600;}
+.w-info{font-size:9px;color:var(--muted2);line-height:1.7;}
+.loc-line{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);display:flex;align-items:center;gap:5px;}
+.loc-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ZONE BAR */
+.zone-bar{background:var(--wire);border-bottom:1px solid #222;padding:0 28px;display:flex;gap:0;overflow-x:auto;}
+.z-btn{background:none;border:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap;color:var(--muted2);}
+.z-btn:hover{color:var(--paper);}
+.z-btn.active{color:var(--paper);border-bottom-color:var(--signal);}
+.z-btn.mn{color:#ff6b6b;}.z-btn.bk{color:#6baaff;}.z-btn.qn{color:#ffb86b;}.z-btn.bx{color:#6bffaa;}.z-btn.si{color:#cc6bff;}
+.z-btn.active.mn{border-bottom-color:#ff6b6b;}.z-btn.active.bk{border-bottom-color:#6baaff;}.z-btn.active.qn{border-bottom-color:#ffb86b;}.z-btn.active.bx{border-bottom-color:#6bffaa;}.z-btn.active.si{border-bottom-color:#cc6bff;}
+.hood-wrap{position:relative;}
+.hood-dd{display:none;position:absolute;top:100%;left:0;background:var(--wire);border:1px solid #2a2a1e;border-radius:3px;padding:5px 0;z-index:600;min-width:200px;max-height:320px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.6);}
+.hood-dd.open{display:block;}
+.hood-dd-item{padding:7px 14px;cursor:pointer;font-size:12px;color:var(--muted2);transition:background .1s;display:flex;align-items:center;gap:6px;}
+.hood-dd-item:hover{background:var(--wire2);color:var(--paper);}
+.hood-dd-sep{padding:4px 14px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--signal);letter-spacing:.15em;text-transform:uppercase;border-top:1px solid #222;margin-top:3px;}
+
+/* MAIN TAB NAV */
+.tab-nav{background:var(--ink);border-bottom:1px solid #1a1a14;padding:0 28px;display:flex;gap:0;overflow-x:auto;}
+.tab-btn{background:none;border:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:9px 16px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.tab-btn:hover{color:var(--muted2);}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+.notif{background:var(--signal);color:#fff;font-size:8px;padding:1px 4px;border-radius:8px;}
+
+/* SHELL */
+.shell{display:grid;grid-template-columns:210px 1fr 280px;max-width:1440px;margin:0 auto;}
+
+/* SIDEBARS */
+.left-col{border-right:1px solid #191914;padding:18px 14px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+.right-col{padding:18px 14px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+.sb-hdr{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--wire2);}
+.hood-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:2px;cursor:pointer;transition:background .12s;font-size:12px;color:var(--muted2);border-left:2px solid transparent;margin-bottom:1px;}
+.hood-item:hover{background:var(--wire);color:var(--paper);}
+.hood-item.active{background:var(--wire);color:var(--paper);border-left-color:var(--signal);}
+.hbadge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--amber);background:rgba(240,165,0,.1);padding:1px 4px;border-radius:1px;}
+.sb-sec{margin-bottom:20px;}
+
+/* MAIN FEED */
+.feed-col{border-right:1px solid #191914;}
+.feed-hdr{padding:14px 22px;border-bottom:1px solid #191914;display:flex;align-items:center;justify-content:space-between;position:sticky;top:58px;z-index:100;background:var(--ink);}
+.feed-title{font-family:'Playfair Display',serif;font-size:19px;font-style:italic;font-weight:700;}
+.feed-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--signal);display:inline-block;animation:pulse 1s infinite;}
+.tx-btn{background:var(--signal);color:#fff;border:none;padding:7px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s;}
+.tx-btn:hover{background:#c0300c;transform:translateY(-1px);}
+
+/* TAB PAGES */
+.tab-page{display:none;}.tab-page.active{display:block;}
+
+/* CARDS */
+.card{border-bottom:1px solid #161611;padding:18px 22px;position:relative;transition:background .12s;cursor:pointer;}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .12s;}
+.card:hover{background:rgba(255,255,255,.015);}
+.card:hover::before{background:var(--signal);}
+.card-top{display:flex;align-items:center;gap:7px;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);flex-wrap:wrap;}
+.tag{padding:2px 6px;border-radius:1px;font-size:8px;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;}
+.t-video{color:var(--signal);}.t-audio{color:var(--amber);}.t-article{color:var(--teal);}.t-photo{color:#9b7fe8;}
+.t-apple{color:var(--apple);}.t-spotify{color:var(--spotify);}.t-iheart{color:var(--iHeart);}.t-pocket{color:var(--pocket);}
+.t-tiktok{color:var(--tt);}.t-ig{color:var(--ig);}.t-reddit{color:#FF4500;}.t-free{color:#22c55e;}
+.breaking{background:var(--signal);color:#fff;border:none;animation:blink 1.2s step-end infinite;font-size:8px;padding:2px 5px;border-radius:1px;letter-spacing:.1em;text-transform:uppercase;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.hood-pill{background:var(--wire2);color:var(--muted2);padding:2px 6px;border-radius:10px;font-size:8px;}
+.src{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);background:var(--wire2);padding:2px 6px;border-radius:10px;display:inline-flex;align-items:center;gap:3px;}
+.card-hl{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3;color:var(--paper);margin-bottom:6px;}
+.card-deck{font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:11px;}
+.card-acts{display:flex;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);flex-wrap:wrap;}
+.act{background:none;border:none;color:inherit;cursor:pointer;font:inherit;display:flex;align-items:center;gap:3px;padding:0;transition:color .12s;}
+.act:hover{color:var(--signal);}
+.act.on{color:var(--amber);}
+
+/* EMBED CONTAINERS */
+.emb{border-radius:4px;overflow:hidden;margin-bottom:11px;background:var(--wire);border:1px solid #222;position:relative;}
+.emb iframe{display:block;width:100%;border:none;}
+.emb-lbl{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.78);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;padding:3px 7px;border-radius:2px;text-transform:uppercase;pointer-events:none;z-index:10;}
+.yt-emb{aspect-ratio:16/9;background:#000;}
+.yt-emb iframe{height:100%;}
+.sp-emb{background:#000;}
+.pod-platform-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.pod-link{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-decoration:none;transition:all .15s;border:1px solid currentColor;}
+.pod-link:hover{transform:translateY(-1px);filter:brightness(1.15);}
+.pod-link.apple{color:var(--apple);border-color:var(--apple);background:rgba(250,36,60,.08);}
+.pod-link.spotify{color:var(--spotify);border-color:var(--spotify);background:rgba(29,185,84,.08);}
+.pod-link.iheart{color:var(--iHeart);border-color:var(--iHeart);background:rgba(198,0,43,.08);}
+.pod-link.pocket{color:var(--pocket);border-color:var(--pocket);background:rgba(239,64,86,.08);}
+.pod-link.overcast{color:#fc7e0f;border-color:#fc7e0f;background:rgba(252,126,15,.08);}
+.pod-link.castro{color:#00b265;border-color:#00b265;background:rgba(0,178,101,.08);}
+
+/* REELS GRID */
+.reels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px;padding:2px;}
+.reel-card{position:relative;aspect-ratio:9/16;background:var(--wire);overflow:hidden;cursor:pointer;transition:transform .2s;}
+.reel-card:hover{transform:scale(1.02);z-index:10;}
+.reel-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.reel-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);}
+.reel-src{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 7px;border-radius:10px;}
+.reel-src.tt{background:rgba(0,0,0,.7);color:var(--tt);}
+.reel-src.ig{background:rgba(0,0,0,.7);color:var(--ig);}
+.reel-info{position:absolute;bottom:0;left:0;right:0;padding:10px;}
+.reel-title{font-size:11px;font-weight:600;line-height:1.3;color:#fff;margin-bottom:4px;}
+.reel-meta{font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,.6);display:flex;justify-content:space-between;}
+.reel-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.2);}
+.reel-hood{position:absolute;top:8px;right:8px;font-family:'IBM Plex Mono',monospace;font-size:8px;background:rgba(0,0,0,.7);color:var(--amber);padding:2px 5px;border-radius:2px;}
+.reels-hdr{padding:14px 22px;border-bottom:1px solid #1a1a14;display:flex;align-items:center;justify-content:space-between;}
+.reels-title{font-family:'Playfair Display',serif;font-size:18px;font-style:italic;}
+.reels-filter{display:flex;gap:6px;}
+.rf-btn{background:var(--wire2);border:1px solid #2a2a1e;color:var(--muted2);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:4px 10px;border-radius:10px;cursor:pointer;transition:all .15s;letter-spacing:.06em;text-transform:uppercase;}
+.rf-btn:hover,.rf-btn.on{background:var(--wire);color:var(--paper);border-color:#444;}
+.rf-btn.tt-on{color:var(--tt);border-color:var(--tt);}
+.rf-btn.ig-on{color:var(--ig);border-color:var(--ig);}
+
+/* PHOTOBOARD */
+.photo-board{padding:0;}
+.photo-hdr{padding:14px 22px;border-bottom:1px solid #1a1a14;display:flex;align-items:center;gap:12px;background:var(--ink);}
+.photo-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.pf-btn{background:var(--wire2);border:1px solid #2a2a1e;color:var(--muted2);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:4px 10px;border-radius:10px;cursor:pointer;transition:all .15s;letter-spacing:.05em;text-transform:uppercase;}
+.pf-btn.on{color:var(--ig);border-color:var(--ig);background:rgba(225,48,108,.08);}
+.masonry{columns:3;gap:3px;padding:3px;}
+.masonry-item{break-inside:avoid;margin-bottom:3px;position:relative;cursor:pointer;overflow:hidden;border-radius:3px;}
+.masonry-item:hover .masonry-overlay{opacity:1;}
+.masonry-img{width:100%;display:block;background:var(--wire);min-height:80px;}
+.masonry-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 50%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;}
+.m-caption{font-size:11px;color:#fff;line-height:1.3;margin-bottom:4px;}
+.m-src{font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px;}
+.m-src-dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
+
+/* FREE THINGS TAB */
+.free-hdr{padding:14px 22px;border-bottom:1px solid #1a1a14;display:flex;align-items:center;justify-content:space-between;}
+.free-filters{display:flex;gap:6px;flex-wrap:wrap;padding:10px 22px;border-bottom:1px solid #1a1a14;background:var(--ink);}
+.ff-btn{background:var(--wire2);border:1px solid #2a2a1e;color:var(--muted2);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:4px 10px;border-radius:10px;cursor:pointer;transition:all .15s;letter-spacing:.05em;text-transform:uppercase;}
+.ff-btn.on{background:rgba(34,197,94,.1);color:#22c55e;border-color:#22c55e;}
+.free-card{display:flex;gap:14px;padding:16px 22px;border-bottom:1px solid #161611;cursor:pointer;transition:background .12s;}
+.free-card:hover{background:rgba(255,255,255,.015);}
+.free-emoji{font-size:32px;flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--wire);border-radius:3px;}
+.free-body{flex:1;}
+.free-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.3;color:var(--paper);margin-bottom:4px;}
+.free-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:5px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);}
+.free-tag{padding:2px 6px;border-radius:10px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;}
+.ft-art{background:rgba(155,127,232,.15);color:#9b7fe8;}
+.ft-out{background:rgba(34,197,94,.12);color:#22c55e;}
+.ft-food{background:rgba(240,165,0,.12);color:var(--amber);}
+.ft-music{background:rgba(232,57,14,.12);color:var(--signal);}
+.ft-comm{background:rgba(26,138,120,.12);color:var(--teal);}
+.ft-kids{background:rgba(107,170,255,.12);color:#6baaff;}
+.free-desc{font-size:12px;color:var(--muted2);line-height:1.6;}
+.free-src{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:5px;}
+.free-right{text-align:right;flex-shrink:0;}
+.free-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);font-weight:600;}
+.free-time{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.free-hood-pill{background:var(--wire2);color:var(--muted2);padding:2px 6px;border-radius:10px;font-size:8px;margin-top:6px;display:inline-block;}
+.free-loading{text-align:center;padding:40px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;}
+.spinner{width:18px;height:18px;border:2px solid var(--wire2);border-top-color:var(--signal);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.free-sources-bar{padding:8px 22px;background:var(--wire);border-bottom:1px solid #222;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.src-pill{padding:2px 8px;border-radius:10px;border:1px solid currentColor;color:var(--teal);}
+
+/* WIDGETS */
+.w-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--wire2);}
+.widget{margin-bottom:20px;}
+.boro-row{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:2px;cursor:pointer;transition:background .12s;}
+.boro-row:hover{background:var(--wire2);}
+.b-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.b-name{font-size:11px;color:var(--paper);font-weight:500;}
+.b-count{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);}
+.b-bar{height:2px;border-radius:1px;margin-top:2px;}
+.trend-item{display:flex;gap:7px;padding:6px 0;border-bottom:1px solid #161611;cursor:pointer;}
+.trend-n{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--wire2);line-height:1;min-width:18px;}
+.trend-n.hot{color:var(--signal);}
+.trend-t{font-size:11px;font-weight:600;color:var(--paper);margin-bottom:2px;line-height:1.3;}
+.trend-m{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);}
+.rep-row{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.rep-av{width:28px;height:28px;border-radius:50%;background:var(--wire2);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;position:relative;flex-shrink:0;}
+.rep-live{position:absolute;bottom:-1px;right:-1px;width:7px;height:7px;background:var(--signal);border-radius:50%;border:1px solid var(--ink);animation:pulse 1s infinite;}
+.rep-name{font-size:11px;font-weight:600;color:var(--paper);}
+.rep-beat{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);}
+.src-links a{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;padding:4px 0;border-bottom:1px solid #1a1a14;}
+.src-links a span{color:var(--muted);}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:#111108;border:1px solid #2a2a1e;border-top:3px solid var(--signal);width:580px;max-width:95vw;border-radius:4px;padding:24px;position:relative;animation:slideUp .2s ease-out;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.m-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;font-style:italic;margin-bottom:3px;}
+.m-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:16px;}
+.close-x{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:17px;cursor:pointer;}
+.close-x:hover{color:var(--paper);}
+.fmt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.fp{background:var(--wire2);border:1px solid #2a2a1e;color:var(--muted2);padding:8px 4px;border-radius:2px;cursor:pointer;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;transition:all .12s;}
+.fp span{display:block;font-size:17px;margin-bottom:2px;}
+.fp:hover,.fp.sel{border-color:var(--signal);color:var(--signal);background:rgba(232,57,14,.08);}
+textarea{width:100%;background:var(--wire2);border:1px solid #2a2a1e;color:var(--paper);font-family:'Libre Franklin',sans-serif;font-size:13px;line-height:1.7;padding:10px 12px;border-radius:2px;resize:vertical;min-height:80px;outline:none;transition:border-color .12s;}
+textarea:focus{border-color:var(--signal);}
+textarea::placeholder{color:var(--muted);}
+.m-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.rad-sel{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.rad-sel select{background:var(--wire2);border:1px solid #2a2a1e;color:var(--paper);padding:3px 7px;font-family:inherit;font-size:9px;border-radius:2px;outline:none;cursor:pointer;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--wire2);border-radius:2px;}
+
+/* SECTION RULE */
+.sec-rule{text-align:center;padding:8px 0 4px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #161611;margin:0 22px;}
+
+/* MOBILE */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr;}
+  .left-col,.right-col{display:none;}
+  .masthead{grid-template-columns:1fr;padding:10px 14px;}
+  .mast-l,.mast-r{display:none;}
+  .card,.feed-hdr{padding-left:14px;padding-right:14px;}
+  .zone-bar,.tab-nav{padding:0 8px;}
+  .masonry{columns:2;}
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner">
+    🔴 LIVE: Atlantic Yards protesters block Flatbush Ave — developer trucks turned back &nbsp;·&nbsp;
+    🎙️ NEW PODCAST: Gothamist "The City" ep.88 — Rikers countdown live on Spotify &nbsp;·&nbsp;
+    📸 Jackson Heights mural begins at 74th & Roosevelt Ave — IG @jhheights documenting &nbsp;·&nbsp;
+    🆓 FREE this weekend: Brooklyn Museum First Saturday · MoMA Free Friday 5-9pm · Central Park SummerStage &nbsp;·&nbsp;
+    🚇 G train delays Greenpoint–Bedford due to signal failure · MTA working &nbsp;·&nbsp;
+    🎥 TikTok @nycstreetlife going live from Crown Heights block party 6pm &nbsp;·&nbsp;
+    🏗️ SoHo rezoning vote pushed to April — community board demands full EIS &nbsp;·&nbsp;
+    🌡️ Open-Meteo: NYC 58°F partly cloudy, NW winds 12mph
+  </span>
+</div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="mast-l">
+    <div>WEDNESDAY, MARCH 18, 2026</div>
+    <div>EDITION <strong>NYC-247</strong> &nbsp;·&nbsp; 5 BOROUGHS</div>
+    <div><strong style="color:var(--signal)">●</strong> 3,841 CONTRIBUTORS &nbsp;·&nbsp; 74 ZONES</div>
+  </div>
+  <div class="logo">
+    <div class="logo-word">LocalWire</div>
+    <div class="logo-tag">New York City · Hyperlocal Signal Network</div>
+  </div>
+  <div class="mast-r">
+    <div class="weather-box">
+      <span style="font-size:18px">🌆</span>
+      <div class="w-temp" id="wTemp">–°F</div>
+      <div class="w-info" id="wInfo">Loading<br>NYC weather...</div>
+    </div>
+    <div class="loc-line"><span class="loc-dot"></span><span id="locLabel">📍 Detecting your zone...</span></div>
+    <button class="tx-btn" onclick="openModal()">+ Broadcast</button>
+  </div>
+</header>
+
+<!-- ZONE BAR -->
+<nav class="zone-bar">
+  <button class="z-btn active" onclick="setZ(this,'nyc')">📡 All NYC</button>
+  <button class="z-btn mn" onclick="setZ(this,'manhattan')">🟥 Manhattan</button>
+  <button class="z-btn bk" onclick="setZ(this,'brooklyn')">🟦 Brooklyn</button>
+  <button class="z-btn qn" onclick="setZ(this,'queens')">🟧 Queens</button>
+  <button class="z-btn bx" onclick="setZ(this,'bronx')">🟩 Bronx</button>
+  <button class="z-btn si" onclick="setZ(this,'staten')">🟪 Staten Is.</button>
+  <div style="width:1px;background:#2a2a1e;margin:8px 4px;"></div>
+  <div class="hood-wrap">
+    <button class="z-btn" id="hoodBtn" onclick="toggleHood(this)">📍 Neighborhood ▾</button>
+    <div class="hood-dd" id="hoodDd">
+      <div class="hood-dd-sep">Manhattan</div>
+      <div class="hood-dd-item" onclick="pickHood('Harlem','🟥')">🟥 Harlem</div>
+      <div class="hood-dd-item" onclick="pickHood('East Village','🟥')">🟥 East Village</div>
+      <div class="hood-dd-item" onclick="pickHood('Washington Heights','🟥')">🟥 Washington Heights</div>
+      <div class="hood-dd-item" onclick="pickHood('Inwood','🟥')">🟥 Inwood</div>
+      <div class="hood-dd-item" onclick="pickHood('Lower East Side','🟥')">🟥 Lower East Side</div>
+      <div class="hood-dd-item" onclick="pickHood('Chinatown','🟥')">🟥 Chinatown</div>
+      <div class="hood-dd-sep">Brooklyn</div>
+      <div class="hood-dd-item" onclick="pickHood('Williamsburg','🟦')">🟦 Williamsburg</div>
+      <div class="hood-dd-item" onclick="pickHood('Crown Heights','🟦')">🟦 Crown Heights</div>
+      <div class="hood-dd-item" onclick="pickHood('Bed-Stuy','🟦')">🟦 Bed-Stuy</div>
+      <div class="hood-dd-item" onclick="pickHood('Flatbush','🟦')">🟦 Flatbush</div>
+      <div class="hood-dd-item" onclick="pickHood('Sunset Park','🟦')">🟦 Sunset Park</div>
+      <div class="hood-dd-sep">Queens</div>
+      <div class="hood-dd-item" onclick="pickHood('Astoria','🟧')">🟧 Astoria</div>
+      <div class="hood-dd-item" onclick="pickHood('Jackson Heights','🟧')">🟧 Jackson Heights</div>
+      <div class="hood-dd-item" onclick="pickHood('Flushing','🟧')">🟧 Flushing</div>
+      <div class="hood-dd-item" onclick="pickHood('Jamaica','🟧')">🟧 Jamaica</div>
+      <div class="hood-dd-sep">The Bronx</div>
+      <div class="hood-dd-item" onclick="pickHood('Fordham','🟩')">🟩 Fordham</div>
+      <div class="hood-dd-item" onclick="pickHood('Mott Haven','🟩')">🟩 Mott Haven</div>
+      <div class="hood-dd-item" onclick="pickHood('Tremont','🟩')">🟩 Tremont</div>
+      <div class="hood-dd-sep">Staten Island</div>
+      <div class="hood-dd-item" onclick="pickHood('St. George','🟪')">🟪 St. George</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN TAB NAV -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab(this,'wire')">📡 Wire Feed <span class="notif">24</span></button>
+  <button class="tab-btn" onclick="switchTab(this,'reels')">🎬 Reels</button>
+  <button class="tab-btn" onclick="switchTab(this,'podcasts')">🎙️ Podcasts</button>
+  <button class="tab-btn" onclick="switchTab(this,'photos')">📸 Photoboard</button>
+  <button class="tab-btn" onclick="switchTab(this,'free')">🆓 Free NYC <span class="notif" style="background:#22c55e;">New</span></button>
+  <button class="tab-btn" onclick="switchTab(this,'data')">📊 Open Data</button>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+
+<!-- LEFT SIDEBAR -->
+<aside class="left-col">
+  <div class="sb-sec">
+    <div class="sb-hdr">Manhattan</div>
+    <div class="hood-item active" onclick="pickHood('Harlem','🟥')">Harlem<span class="hbadge">12</span></div>
+    <div class="hood-item" onclick="pickHood('East Village','🟥')">East Village<span class="hbadge">8</span></div>
+    <div class="hood-item" onclick="pickHood('Washington Heights','🟥')">Wash. Heights<span class="hbadge">5</span></div>
+    <div class="hood-item" onclick="pickHood('Lower East Side','🟥')">Lower East Side<span class="hbadge">7</span></div>
+    <div class="hood-item" onclick="pickHood('Inwood','🟥')">Inwood<span class="hbadge">2</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-hdr" style="color:#6baaff;">Brooklyn</div>
+    <div class="hood-item" onclick="pickHood('Williamsburg','🟦')">Williamsburg<span class="hbadge">15</span></div>
+    <div class="hood-item" onclick="pickHood('Crown Heights','🟦')">Crown Heights<span class="hbadge">9</span></div>
+    <div class="hood-item" onclick="pickHood('Bed-Stuy','🟦')">Bed-Stuy<span class="hbadge">11</span></div>
+    <div class="hood-item" onclick="pickHood('Flatbush','🟦')">Flatbush<span class="hbadge">6</span></div>
+    <div class="hood-item" onclick="pickHood('Sunset Park','🟦')">Sunset Park<span class="hbadge">4</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-hdr" style="color:#ffb86b;">Queens</div>
+    <div class="hood-item" onclick="pickHood('Astoria','🟧')">Astoria<span class="hbadge">7</span></div>
+    <div class="hood-item" onclick="pickHood('Jackson Heights','🟧')">Jackson Heights<span class="hbadge">10</span></div>
+    <div class="hood-item" onclick="pickHood('Flushing','🟧')">Flushing<span class="hbadge">8</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-hdr" style="color:#6bffaa;">The Bronx</div>
+    <div class="hood-item" onclick="pickHood('Fordham','🟩')">Fordham<span class="hbadge">5</span></div>
+    <div class="hood-item" onclick="pickHood('Mott Haven','🟩')">Mott Haven<span class="hbadge">6</span></div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="feed-col">
+
+<!-- ═══════════════ TAB: WIRE FEED ═══════════════ -->
+<div class="tab-page active" id="tab-wire">
+  <div class="feed-hdr">
+    <div>
+      <div class="feed-title" id="feedTitle">All NYC Signal Feed</div>
+      <div class="feed-sub"><span class="live-dot"></span> <span id="feedSub">247 stories · updating live</span></div>
+    </div>
+  </div>
+
+  <!-- YouTube Embed -->
+  <div class="card" data-zone="manhattan">
+    <div class="card-top">
+      <span class="tag t-video">YouTube</span><span class="breaking">Breaking</span>
+      <span class="hood-pill">🟥 Harlem</span><span>· 1 hr ago</span>
+      <span class="src">▶️ Documented NY</span>
+    </div>
+    <div class="card-hl">Harlem Rent Strike: Tenants at 409 Edgecombe Without Heat for 6 Months</div>
+    <div class="card-deck">Documented NY embedded with residents of the historic building. HPD records show 47 open violations — the city's response has been silence.</div>
+    <div class="emb yt-emb">
+      <div class="emb-lbl">▶️ YouTube</div>
+      <iframe src="https://www.youtube.com/embed/yMIAFIZxDFU?rel=0&modestbranding=1" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="width:100%;height:100%;"></iframe>
+    </div>
+    <div class="card-acts">
+      <button class="act">♻️ 178</button><button class="act">💬 42</button><button class="act">⚡ 634</button><button class="act" style="margin-left:auto">🔖</button>
+    </div>
+  </div>
+
+  <!-- Spotify -->
+  <div class="card" data-zone="nyc">
+    <div class="card-top">
+      <span class="tag t-spotify">Spotify</span>
+      <span class="hood-pill">📡 NYC-Wide</span><span>· 3 hrs ago</span>
+      <span class="src">🎙️ Hell Gate Media</span>
+    </div>
+    <div class="card-hl">Hell Gate Ep. 31: The Rikers Closure Timeline Nobody Talks About</div>
+    <div class="card-deck">NYC's independent newsroom breaks down the political stall behind the jail closure mandate. Advocates, a former CO, and a city council member.</div>
+    <div class="emb sp-emb">
+      <div class="emb-lbl">🎵 Spotify</div>
+      <iframe style="border-radius:4px" src="https://open.spotify.com/embed/episode/6rqhFgbbKwnb9MLmUQDhf6?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>
+    </div>
+    <div class="card-acts">
+      <button class="act">♻️ 94</button><button class="act">💬 31</button><button class="act on">⚡ 287</button><button class="act" style="margin-left:auto">🔖</button>
+    </div>
+  </div>
+
+  <!-- Reddit Community -->
+  <div class="card" data-zone="nyc">
+    <div class="card-top">
+      <span class="tag t-reddit">Community</span>
+      <span class="hood-pill">📡 NYC-Wide</span><span>· 2 hrs ago</span>
+      <span class="src">💬 r/nyc</span>
+    </div>
+    <div class="card-hl">What NYC is talking about right now</div>
+    <div style="background:linear-gradient(135deg,#1a1a14,#1f1a14);border:1px solid #2a2a1e;border-radius:3px;padding:12px;margin-bottom:11px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#FF4500;margin-bottom:10px;display:flex;align-items:center;gap:6px;">🟠 Top threads · r/nyc · r/brooklyn · r/queens · r/AskNYC</div>
+      <div id="redditPosts"></div>
+    </div>
+    <div class="card-acts">
+      <button class="act" onclick="window.open('https://reddit.com/r/nyc','_blank')">🔗 r/nyc</button>
+      <button class="act" onclick="window.open('https://reddit.com/r/brooklyn','_blank')">🔗 r/brooklyn</button>
+      <button class="act" onclick="window.open('https://reddit.com/r/queens','_blank')">🔗 r/queens</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ TAB: REELS ═══════════════ -->
+<div class="tab-page" id="tab-reels">
+  <div class="reels-hdr">
+    <div class="feed-title">NYC Reels</div>
+    <div class="reels-filter">
+      <button class="rf-btn tt-on on" onclick="toggleReelFilter(this,'tt')">🎵 TikTok</button>
+      <button class="rf-btn ig-on on" onclick="toggleReelFilter(this,'ig')">📸 IG Reels</button>
+    </div>
+  </div>
+  <div style="background:var(--wire);border-bottom:1px solid #222;padding:8px 22px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted2);">
+    ⚠️ TikTok & Instagram require login to embed directly — cards link to live content from NYC creators. Click any card to open the reel.
+  </div>
+  <div class="reels-grid" id="reelsGrid"></div>
+</div>
+
+<!-- ═══════════════ TAB: PODCASTS ═══════════════ -->
+<div class="tab-page" id="tab-podcasts">
+  <div class="feed-hdr">
+    <div>
+      <div class="feed-title">NYC Podcasts</div>
+      <div class="feed-sub"><span class="live-dot"></span> Made in or about New York City</div>
+    </div>
+  </div>
+  <div style="background:var(--wire);padding:8px 22px;border-bottom:1px solid #222;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted2);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span>Available on:</span>
+    <span style="color:var(--apple)">🎵 Apple Podcasts</span>
+    <span style="color:var(--spotify)">🎵 Spotify</span>
+    <span style="color:var(--iHeart)">📻 iHeartRadio</span>
+    <span style="color:var(--pocket)">🎧 Pocket Casts</span>
+    <span style="color:#fc7e0f">☁️ Overcast</span>
+    <span style="color:#00b265">🎙️ Castro</span>
+    <span style="color:var(--muted2)">+ RSS</span>
+  </div>
+  <div id="podcastFeed"></div>
+</div>
+
+<!-- ═══════════════ TAB: PHOTOBOARD ═══════════════ -->
+<div class="tab-page" id="tab-photos">
+  <div class="photo-hdr">
+    <div class="feed-title">📸 NYC Photoboard</div>
+  </div>
+  <div style="background:var(--wire);padding:8px 22px;border-bottom:1px solid #222;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted2);">
+    Pulling from Instagram & Pinterest NYC creators · Click to open original
+  </div>
+  <div class="free-filters" style="border-bottom:1px solid #1a1a14;">
+    <button class="pf-btn on" onclick="togglePF(this,'all')">All</button>
+    <button class="pf-btn" onclick="togglePF(this,'street')">🚶 Street</button>
+    <button class="pf-btn" onclick="togglePF(this,'food')">🍜 Food</button>
+    <button class="pf-btn" onclick="togglePF(this,'event')">🎉 Events</button>
+    <button class="pf-btn" onclick="togglePF(this,'nature')">🌿 Parks</button>
+    <button class="pf-btn" onclick="togglePF(this,'art')">🎨 Art/Murals</button>
+    <button class="pf-btn" onclick="togglePF(this,'transit')">🚇 Transit</button>
+  </div>
+  <div class="masonry" id="photoBoard"></div>
+</div>
+
+<!-- ═══════════════ TAB: FREE NYC ═══════════════ -->
+<div class="tab-page" id="tab-free">
+  <div class="free-hdr">
+    <div>
+      <div class="feed-title">🆓 Free Things to Do in NYC</div>
+      <div class="feed-sub"><span class="live-dot" style="background:#22c55e;"></span> <span id="freeSub">Pulling from Instagram, Eventbrite, NYC.gov, TimeOut, Gothamist...</span></div>
+    </div>
+  </div>
+  <div class="free-sources-bar">
+    <span>Sources:</span>
+    <span class="src-pill">NYC.gov/events</span>
+    <span class="src-pill">TimeOut NYC</span>
+    <span class="src-pill">Gothamist</span>
+    <span class="src-pill">Eventbrite (free)</span>
+    <span class="src-pill">NYC Parks</span>
+    <span class="src-pill">IG @nycfreeevents</span>
+    <span class="src-pill">IG @free_nyc</span>
+    <span class="src-pill">Brooklyn Museum</span>
+    <span class="src-pill" style="margin-left:auto;color:var(--amber);" id="freeLastUpdate">Updated just now</span>
+  </div>
+  <div class="free-filters">
+    <button class="ff-btn on" onclick="filterFree(this,'all')">All</button>
+    <button class="ff-btn" onclick="filterFree(this,'art')">🎨 Art & Culture</button>
+    <button class="ff-btn" onclick="filterFree(this,'outdoor')">🌿 Outdoor</button>
+    <button class="ff-btn" onclick="filterFree(this,'food')">🍜 Food</button>
+    <button class="ff-btn" onclick="filterFree(this,'music')">🎵 Music</button>
+    <button class="ff-btn" onclick="filterFree(this,'community')">🤝 Community</button>
+    <button class="ff-btn" onclick="filterFree(this,'kids')">👦 Kids</button>
+    <button class="ff-btn" onclick="filterFree(this,'today')">📅 Today</button>
+    <button class="ff-btn" onclick="filterFree(this,'weekend')">📅 Weekend</button>
+  </div>
+  <div id="freeList"></div>
+</div>
+
+<!-- ═══════════════ TAB: OPEN DATA ═══════════════ -->
+<div class="tab-page" id="tab-data">
+  <div class="feed-hdr">
+    <div>
+      <div class="feed-title">📊 NYC Open Data</div>
+      <div class="feed-sub"><span class="live-dot"></span> Live from data.cityofnewyork.us</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-top"><span class="tag" style="color:var(--teal)">311 Live</span><span class="src">🏙️ NYC Open Data API</span></div>
+    <div class="card-hl">Today's 311 Complaint Feed</div>
+    <div id="openDataRows"><div class="free-loading"><div class="spinner"></div><br>Loading from data.cityofnewyork.us...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-top"><span class="tag" style="color:var(--teal)">Housing</span><span class="src">🏠 HPD Violations</span></div>
+    <div class="card-hl">Housing Maintenance Violations — NYC Open Data</div>
+    <div id="housingRows"><div class="free-loading"><div class="spinner"></div><br>Loading HPD data...</div></div>
+    <div style="margin-top:8px;"><a href="https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);text-decoration:none;">→ Full dataset ↗</a></div>
+  </div>
+</div>
+
+</main>
+
+<!-- RIGHT SIDEBAR -->
+<aside class="right-col">
+  <div class="widget">
+    <div class="w-title">Borough Activity</div>
+    <div>
+      <div class="boro-row" onclick="setZ(document.querySelector('.z-btn.mn'),'manhattan')">
+        <div class="b-dot" style="background:#ff6b6b"></div><div><div class="b-name">Manhattan</div><div class="b-bar" style="width:75%;background:#ff6b6b;opacity:.4;"></div></div><div class="b-count">84 stories</div>
+      </div>
+      <div class="boro-row" onclick="setZ(document.querySelector('.z-btn.bk'),'brooklyn')">
+        <div class="b-dot" style="background:#6baaff"></div><div><div class="b-name">Brooklyn</div><div class="b-bar" style="width:90%;background:#6baaff;opacity:.4;"></div></div><div class="b-count">102</div>
+      </div>
+      <div class="boro-row" onclick="setZ(document.querySelector('.z-btn.qn'),'queens')">
+        <div class="b-dot" style="background:#ffb86b"></div><div><div class="b-name">Queens</div><div class="b-bar" style="width:60%;background:#ffb86b;opacity:.4;"></div></div><div class="b-count">67</div>
+      </div>
+      <div class="boro-row" onclick="setZ(document.querySelector('.z-btn.bx'),'bronx')">
+        <div class="b-dot" style="background:#6bffaa"></div><div><div class="b-name">The Bronx</div><div class="b-bar" style="width:45%;background:#6bffaa;opacity:.4;"></div></div><div class="b-count">51</div>
+      </div>
+      <div class="boro-row" onclick="setZ(document.querySelector('.z-btn.si'),'staten')">
+        <div class="b-dot" style="background:#cc6bff"></div><div><div class="b-name">Staten Island</div><div class="b-bar" style="width:18%;background:#cc6bff;opacity:.4;"></div></div><div class="b-count">22</div>
+      </div>
+    </div>
+  </div>
+  <div class="widget">
+    <div class="w-title">Trending</div>
+    <div class="trend-item"><div class="trend-n hot">1</div><div><div class="trend-t">#AtlanticYards</div><div class="trend-m">412 signals · Brooklyn</div></div></div>
+    <div class="trend-item"><div class="trend-n hot">2</div><div><div class="trend-t">Rikers Closure</div><div class="trend-m">284 · NYC-wide</div></div></div>
+    <div class="trend-item"><div class="trend-n">3</div><div><div class="trend-t">G Train Delays</div><div class="trend-m">231 · BK/Queens</div></div></div>
+    <div class="trend-item"><div class="trend-n">4</div><div><div class="trend-t">Free First Saturday</div><div class="trend-m">198 · Brooklyn</div></div></div>
+    <div class="trend-item"><div class="trend-n">5</div><div><div class="trend-t">Jackson Heights Mural</div><div class="trend-m">178 · Queens</div></div></div>
+    <div class="trend-item"><div class="trend-n">6</div><div><div class="trend-t">Bronx Air Quality</div><div class="trend-m">143 · The Bronx</div></div></div>
+  </div>
+  <div class="widget">
+    <div class="w-title">On the Ground</div>
+    <div class="rep-row"><div class="rep-av" style="border-color:var(--signal);">MO<div class="rep-live"></div></div><div><div class="rep-name">Marcus Okafor</div><div class="rep-beat">📍 Atlantic Yards · Video</div></div></div>
+    <div class="rep-row"><div class="rep-av" style="border-color:var(--amber);">LT<div class="rep-live"></div></div><div><div class="rep-name">Lorena Tran</div><div class="rep-beat">📍 Flushing · Audio</div></div></div>
+    <div class="rep-row"><div class="rep-av" style="border-color:#9b7fe8;">RJ</div><div><div class="rep-name">Renata Jiménez</div><div class="rep-beat">📍 Jackson Heights</div></div></div>
+    <div class="rep-row"><div class="rep-av" style="border-color:var(--teal);">SK</div><div><div class="rep-name">Soren Kim</div><div class="rep-beat">📍 Mott Haven</div></div></div>
+    <div class="rep-row"><div class="rep-av" style="border-color:#6baaff;">DA<div class="rep-live"></div></div><div><div class="rep-name">Delia Achebe</div><div class="rep-beat">📍 Crown Heights</div></div></div>
+  </div>
+  <div class="widget">
+    <div class="w-title">NYC Newsrooms</div>
+    <div class="src-links">
+      <a href="https://gothamist.com" target="_blank">Gothamist ↗<span>WNYC</span></a>
+      <a href="https://hellgatenyc.com" target="_blank">Hell Gate Media ↗<span>Independent</span></a>
+      <a href="https://thecity.nyc" target="_blank">THE CITY ↗<span>Nonprofit</span></a>
+      <a href="https://www.documentedny.com" target="_blank">Documented NY ↗<span>Immigrant</span></a>
+      <a href="https://bklynr.com" target="_blank">Bklyn Reader ↗<span>Brooklyn</span></a>
+      <a href="https://data.cityofnewyork.us" target="_blank">NYC Open Data ↗<span>Gov</span></a>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- COMPOSE MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <div class="m-title">Broadcast to NYC</div>
+    <div class="m-sub" id="mSub">ZONE: ALL NYC · LOCALWIRE HYPERLOCAL SIGNAL</div>
+    <div class="fmt-grid">
+      <button class="fp sel" onclick="selFP(this)"><span>🎥</span>Video</button>
+      <button class="fp" onclick="selFP(this)"><span>🎙️</span>Audio</button>
+      <button class="fp" onclick="selFP(this)"><span>📸</span>Photos</button>
+      <button class="fp" onclick="selFP(this)"><span>✍️</span>Article</button>
+    </div>
+    <textarea placeholder="What's happening? Street corner, building address, time, names. Hyperlocal journalism runs on specifics."></textarea>
+    <div class="m-foot">
+      <div class="rad-sel">📡 Radius: <select><option>0.5mi Block</option><option>1mi Neighborhood</option><option selected>3mi District</option><option>Borough</option><option>City-wide</option></select></div>
+      <button class="tx-btn">📡 Transmit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════ DATA STORES ═══════
+
+const REELS_DATA = [
+  {src:'tt',hood:'Harlem',emoji:'🎤',title:'Harlem tenant speaks out after 3rd lockout attempt this month',views:'42k',user:'@harlemnow',url:'https://www.tiktok.com/search?q=harlem+nyc+tenant',bg:'linear-gradient(135deg,#1a0a0a,#3a1010)'},
+  {src:'ig',hood:'Williamsburg',emoji:'🍕',title:'Legendary $1 slice spot on Bedford Ave — is it still there?',views:'28k',user:'@bklynbites',url:'https://www.instagram.com/explore/tags/williamsburg/',bg:'linear-gradient(135deg,#0a0a1a,#101035)'},
+  {src:'tt',hood:'Jackson Heights',emoji:'🌮',title:'74th St Roosevelt Ave: every cuisine in one block challenge',views:'156k',user:'@jacksonheightseats',url:'https://www.tiktok.com/search?q=jackson+heights+food',bg:'linear-gradient(135deg,#1a0f00,#3a2000)'},
+  {src:'ig',hood:'Mott Haven',emoji:'🎨',title:'South Bronx murals: the artists the city never talks about',views:'19k',user:'@southbronxarts',url:'https://www.instagram.com/explore/tags/motthavennyc/',bg:'linear-gradient(135deg,#0a1a0a,#102010)'},
+  {src:'tt',hood:'Crown Heights',emoji:'🥁',title:'Steel pan practice at Crown Heights block party — full vid',views:'88k',user:'@crownhgts',url:'https://www.tiktok.com/search?q=crown+heights+brooklyn',bg:'linear-gradient(135deg,#150a1a,#2a1035)'},
+  {src:'ig',hood:'Flushing',emoji:'🍜',title:'Flushing Queens night market haul — 11 dishes under $20',views:'243k',user:'@flushingfoodie',url:'https://www.instagram.com/explore/tags/flushingqueens/',bg:'linear-gradient(135deg,#1a0800,#3a1800)'},
+  {src:'tt',hood:'Astoria',emoji:'🌊',title:'Astoria Park at 5am — empty NYC you never see',views:'67k',user:'@astoriabuzz',url:'https://www.tiktok.com/search?q=astoria+park+nyc',bg:'linear-gradient(135deg,#00101a,#002030)'},
+  {src:'ig',hood:'Lower East Side',emoji:'🎭',title:'LES street art tour — every building has a story',views:'34k',user:'@lesnyc',url:'https://www.instagram.com/explore/tags/lowereastside/',bg:'linear-gradient(135deg,#1a1500,#2a2200)'},
+  {src:'tt',hood:'Bed-Stuy',emoji:'🏡',title:'Bed-Stuy brownstone history: what these blocks used to be',views:'112k',user:'@bedstuynow',url:'https://www.tiktok.com/search?q=bed+stuy+brooklyn+history',bg:'linear-gradient(135deg,#001520,#002535)'},
+  {src:'ig',hood:'Fordham',emoji:'⚽',title:'Fordham Rd pickup soccer — Saturday morning tradition',views:'15k',user:'@bronxsports',url:'https://www.instagram.com/explore/tags/thebronx/',bg:'linear-gradient(135deg,#0a1a05,#152505)'},
+  {src:'tt',hood:'Chinatown',emoji:'🏮',title:'Chinatown at 7am — the city before the city wakes up',views:'321k',user:'@nycchinatown',url:'https://www.tiktok.com/search?q=chinatown+nyc',bg:'linear-gradient(135deg,#1a0000,#2a0808)'},
+  {src:'ig',hood:'Sunset Park',emoji:'🌅',title:'Sunset Park sunset — best view in Brooklyn nobody talks about',views:'47k',user:'@sunsetparkbk',url:'https://www.instagram.com/explore/tags/sunsetparkbrooklyn/',bg:'linear-gradient(135deg,#0a0a00,#1f1500)'},
+];
+
+const PODCASTS_DATA = [
+  {
+    name:"Hell Gate Media",
+    show:"Hell Gate: NYC News",
+    ep:"Ep. 31: The Rikers Closure Timeline",
+    desc:"NYC's fiercely independent newsroom digs into what's stalling the Rikers closure mandate. Advocates, a former CO, and a council member.",
+    hood:"NYC-wide",tag:"t-audio",
+    spotify:"https://open.spotify.com/embed/episode/6rqhFgbbKwnb9MLmUQDhf6?utm_source=generator&theme=0",
+    apple:"https://podcasts.apple.com/us/podcast/hell-gate/id1593761487",
+    iheart:"https://www.iheart.com/podcast/338-hell-gate-91017278/",
+    pocket:"https://pca.st/podcast/search?q=hell+gate+nyc",
+    overcast:"https://overcast.fm/itunes1593761487/hell-gate",
+    rss:"https://feeds.acast.com/public/shows/hell-gate",
+    img:"🏛️"
+  },
+  {
+    name:"WNYC / Gothamist",
+    show:"The Brian Lehrer Show",
+    ep:"NYC Budget Gap: What the Mayor Isn't Saying",
+    desc:"WNYC's flagship program. Today: the $7B budget gap, what cuts are real, and who gets hurt. Callers from all five boroughs.",
+    hood:"NYC-wide",tag:"t-spotify",
+    spotify:"https://open.spotify.com/embed/show/3RENOd3q73RIe94VLF2P7E?utm_source=generator&theme=0",
+    apple:"https://podcasts.apple.com/us/podcast/the-brian-lehrer-show/id73330855",
+    iheart:"https://www.iheart.com/podcast/256-the-brian-lehrer-show-30710938/",
+    pocket:"https://pca.st/podcast/search?q=brian+lehrer+wnyc",
+    overcast:"https://overcast.fm/itunes73330855",
+    rss:"https://www.wnyc.org/feeds/shows/bl",
+    img:"📻"
+  },
+  {
+    name:"The City NYC",
+    show:"FAQ NYC",
+    ep:"How the City's Homeless Shelter System Really Works",
+    desc:"THE CITY's nonprofit investigative team on the understaffed, under-inspected shelter network. Two years of records, dozens of sources.",
+    hood:"NYC-wide",tag:"t-apple",
+    spotify:"https://open.spotify.com/embed/show/0qAp3qKDETSKhFBqR3HAHB?utm_source=generator&theme=0",
+    apple:"https://podcasts.apple.com/us/podcast/faq-nyc/id1493255335",
+    iheart:"https://www.iheart.com/podcast/338-faq-nyc-61527574/",
+    pocket:"https://pca.st/podcast/search?q=faq+nyc",
+    overcast:"https://overcast.fm/itunes1493255335",
+    rss:"https://feeds.simplecast.com/wbur_faqnyc",
+    img:"🗞️"
+  },
+  {
+    name:"Documented NY",
+    show:"Documented: Immigrant NYC",
+    ep:"Flushing's Changing Immigration Map — Who's Arriving Now",
+    desc:"Documented covers immigrant communities with depth. This episode: the new wave of Central American migrants reshaping Queens neighborhoods.",
+    hood:"Queens",tag:"t-audio",
+    spotify:"https://open.spotify.com/embed/show/1YlNUBmEBFcGPL3t1XVMXP?utm_source=generator&theme=0",
+    apple:"https://podcasts.apple.com/us/podcast/documented/id1437743186",
+    iheart:"https://www.iheart.com/podcast/338-documented-98765432/",
+    pocket:"https://pca.st/podcast/search?q=documented+nyc",
+    overcast:"https://overcast.fm/itunes1437743186",
+    rss:"https://feeds.documentedny.com/podcast",
+    img:"🌎"
+  },
+  {
+    name:"Gothamist",
+    show:"The Gothamist",
+    ep:"Crown Heights: 30 Years After the Riots — Who Remembers?",
+    desc:"WNYC / Gothamist archive special. Residents who lived through the 1991 riots describe the neighborhood today. Oral history, data, maps.",
+    hood:"Crown Heights",tag:"t-spotify",
+    spotify:"https://open.spotify.com/embed/show/3ZCpBWJlWkEV6Nup5FEYMD?utm_source=generator&theme=0",
+    apple:"https://podcasts.apple.com/us/podcast/gothamist/id1567408371",
+    iheart:"https://www.iheart.com/podcast/256-gothamist-news-98234512/",
+    pocket:"https://pca.st/podcast/search?q=gothamist",
+    overcast:"https://overcast.fm/itunes1567408371",
+    rss:"https://gothamist.com/feeds/podcast",
+    img:"🏙️"
+  },
+];
+
+const PHOTOS_DATA = [
+  {cat:'street',hood:'Harlem',src:'ig',caption:'Morning light on 125th St — @nychues',emoji:'🌅',bg:'linear-gradient(135deg,#2a1500,#3a2000)',h:280,url:'https://www.instagram.com/explore/tags/harlemnyc/'},
+  {cat:'food',hood:'Flushing',src:'ig',caption:'Soup dumplings at Golden Mall — @flushingfoodie',emoji:'🥟',bg:'linear-gradient(135deg,#1a0800,#2a1000)',h:200,url:'https://www.instagram.com/explore/tags/flushingfoodnyc/'},
+  {cat:'art',hood:'Bushwick',src:'ig',caption:'New Bushwick Collective wall — @bushwickcollective',emoji:'🎨',bg:'linear-gradient(135deg,#0a001a,#150030)',h:320,url:'https://www.instagram.com/explore/tags/bushwickcollective/'},
+  {cat:'nature',hood:'Astoria',src:'pin',caption:'Astoria Park cherry blossoms — via Pinterest',emoji:'🌸',bg:'linear-gradient(135deg,#1a001a,#2a0025)',h:220,url:'https://www.pinterest.com/search/pins/?q=astoria+park+nyc'},
+  {cat:'transit',hood:'NYC-wide',src:'ig',caption:'Last A train before sunrise — @nycsubwaydiary',emoji:'🚇',bg:'linear-gradient(135deg,#000a1a,#001530)',h:180,url:'https://www.instagram.com/explore/tags/nycsubway/'},
+  {cat:'event',hood:'Crown Heights',src:'ig',caption:'Block party off Franklin Ave — @crownhgts',emoji:'🎉',bg:'linear-gradient(135deg,#1a0015,#2a0025)',h:260,url:'https://www.instagram.com/explore/tags/crownheightsbrooklyn/'},
+  {cat:'street',hood:'Jackson Heights',src:'pin',caption:'74th St from above — via Pinterest',emoji:'🌆',bg:'linear-gradient(135deg,#1a1000,#2a1800)',h:240,url:'https://www.pinterest.com/search/pins/?q=jackson+heights+queens+nyc'},
+  {cat:'food',hood:'Chinatown',src:'ig',caption:'Night market stalls on Canal — @chinatownnyc',emoji:'🏮',bg:'linear-gradient(135deg,#1a0000,#2a0808)',h:200,url:'https://www.instagram.com/explore/tags/nycchinatown/'},
+  {cat:'art',hood:'Mott Haven',src:'ig',caption:'South Bronx murals on Brook Ave — @southbronxarts',emoji:'✊',bg:'linear-gradient(135deg,#0a1a00,#102000)',h:300,url:'https://www.instagram.com/explore/tags/southbronx/'},
+  {cat:'nature',hood:'Brooklyn',src:'pin',caption:'Prospect Park in fall — via Pinterest',emoji:'🍂',bg:'linear-gradient(135deg,#1a0f00,#251500)',h:220,url:'https://www.pinterest.com/search/pins/?q=prospect+park+brooklyn'},
+  {cat:'transit',hood:'Brooklyn',src:'ig',caption:'F train over the Gowanus — @subwayviews',emoji:'🌉',bg:'linear-gradient(135deg,#00101a,#001525)',h:180,url:'https://www.instagram.com/explore/tags/nycsubway/'},
+  {cat:'street',hood:'Lower East Side',src:'ig',caption:'Essex Market first light — @nycstreets',emoji:'🥐',bg:'linear-gradient(135deg,#1a1500,#252000)',h:250,url:'https://www.instagram.com/explore/tags/lowereastsidenyc/'},
+];
+
+const FREE_EVENTS = [
+  {emoji:'🎨',title:'Brooklyn Museum First Saturday',date:'Apr 5',time:'5pm – 11pm',cat:'art',hood:'Prospect Heights',desc:'Free all evening — live music, dancing, art-making, and full museum access. One of NYC\'s best monthly traditions.',src:'brooklynmuseum.org',srcLbl:'Brooklyn Museum',url:'https://www.brooklynmuseum.org/events/first_saturdays'},
+  {emoji:'🎵',title:'SummerStage: Free Concerts Central Park',date:'Mar 22',time:'Saturdays 3pm',cat:'music',hood:'Central Park',desc:'NYC Parks\' free outdoor concert series. This week: Latin jazz with Afro-Caribbean ensemble. Blankets welcome.',src:'cityparksfoundation.org',srcLbl:'NYC Parks',url:'https://cityparksfoundation.org/summerstage/'},
+  {emoji:'🖼️',title:'MoMA Free Friday Nights',date:'Every Fri',time:'5:30pm – 9pm',cat:'art',hood:'Midtown',desc:'Museum of Modern Art opens free to all every Friday evening. Galleries, film screenings, and the outdoor sculpture garden.',src:'moma.org',srcLbl:'MoMA',url:'https://www.moma.org/visit/'},
+  {emoji:'🌿',title:'Bronx River Canoe Launch — Free Paddle',date:'Mar 23',time:'10am – 4pm',cat:'outdoor',hood:'Mott Haven',desc:'NYC Parks offers free canoe and kayak rentals on the Bronx River. First come first served. Life jackets provided.',src:'nycparks.gov',srcLbl:'NYC Parks',url:'https://www.nycgovparks.org/parks/bronx-river/programs'},
+  {emoji:'🥘',title:'Jackson Heights Food Walk — Self-Guided',date:'Any day',time:'All day',cat:'food',hood:'Jackson Heights',desc:'Free self-guided tour of 74th St and Roosevelt Ave — over 50 countries of cuisine in half a mile. No ticket needed.',src:'@jacksonheightseats',srcLbl:'Instagram Guide',url:'https://www.instagram.com/explore/tags/jacksonheightsnyc/'},
+  {emoji:'🎭',title:'Public Theater Free Shakespeare in the Park',date:'Jun – Aug',time:'Evenings',cat:'art',hood:'Central Park',desc:'The Delacorte Theater distributes free tickets day-of. Line up early — but it\'s worth every minute. World-class theater, zero cost.',src:'publictheater.org',srcLbl:'The Public',url:'https://publictheater.org/programs/shakespeare-in-the-park/'},
+  {emoji:'🏛️',title:'Metropolitan Museum of Art — Pay What You Wish',date:'Daily',time:'10am – 5pm',cat:'art',hood:'Upper East Side',desc:'NYC residents and NY state students pay what they want — including nothing. 5,000 years of human creativity.',src:'metmuseum.org',srcLbl:'The Met',url:'https://www.metmuseum.org/plan-your-visit/tickets-memberships'},
+  {emoji:'🤝',title:'Crown Heights Community Fridge Volunteer Day',date:'Mar 21',time:'9am – 12pm',cat:'community',hood:'Crown Heights',desc:'Help restock and maintain the community fridge on Franklin Ave. Community organizers will be there. Bring your own bags.',src:'@crownhgts_cares',srcLbl:'Instagram',url:'https://www.instagram.com/explore/tags/communityfridgenyc/'},
+  {emoji:'👦',title:'Brooklyn Public Library — Free Story Time',date:'Saturdays',time:'10:30am',cat:'kids',hood:'Grand Army Plaza',desc:'Free storytime and craft activities for kids ages 3-8 at the Central Library. Multiple branches offer sessions throughout the week.',src:'bklynlibrary.org',srcLbl:'Brooklyn Public Library',url:'https://www.bklynlibrary.org/calendar'},
+  {emoji:'🎵',title:'Jalopy Theatre: Free Folk & Roots Jams',date:'Every Sun',time:'4pm – 7pm',cat:'music',hood:'Red Hook',desc:'Red Hook\'s beloved community music space hosts free all-ages jams every Sunday. Bring an instrument or just come listen.',src:'jalopy.biz',srcLbl:'Jalopy Theatre',url:'http://jalopy.biz/'},
+  {emoji:'🌊',title:'Free Kayaking — Hudson River Park',date:'May – Sep',time:'Weekends',cat:'outdoor',hood:'Hudson River',desc:'Manhattan Community Boathouse offers free public kayaking every weekend. No experience needed. Life jackets and instruction provided.',src:'nycparks.gov',srcLbl:'NYC Parks',url:'https://hudsonriverpark.org/explore-the-park/activities/kayaking/'},
+  {emoji:'🏺',title:'Queens Museum — Pay What You Wish',date:'Daily',time:'11am – 5pm',cat:'art',hood:'Flushing Meadows',desc:'Home of the legendary Panorama of New York City — a scale model of every building in the five boroughs. Locals pay what they can.',src:'queensmuseum.org',srcLbl:'Queens Museum',url:'https://queensmuseum.org/plan-your-visit'},
+  {emoji:'🎨',title:'Bushwick Collective — Outdoor Gallery Walk',date:'Any day',time:'Dawn to dusk',cat:'art',hood:'Bushwick',desc:'The world\'s largest outdoor street art gallery. Over 50 blocks of commissioned murals from artists worldwide. Always free. Always changing.',src:'thebushwickcollective.com',srcLbl:'Bushwick Collective',url:'https://thebushwickcollective.com/'},
+  {emoji:'🌳',title:'NYC Parks Free Fitness Classes',date:'Daily',time:'Various',cat:'outdoor',hood:'City-wide',desc:'NYC Parks runs free fitness classes in parks across all five boroughs — yoga, Zumba, boot camp, tai chi. Check the schedule.',src:'nycparks.gov',srcLbl:'NYC Parks',url:'https://www.nycgovparks.org/programs/recreation/free-fitness'},
+  {emoji:'🥗',title:'Harlem Community Garden Workday',date:'Mar 23',time:'11am – 2pm',cat:'community',hood:'Harlem',desc:'Open workday at the Marcus Garvey Community Garden. Help plant spring seedlings. Free lunch provided for volunteers.',src:'@harlemnow',srcLbl:'Instagram',url:'https://www.instagram.com/explore/tags/harlemgarden/'},
+];
+
+const REDDIT_POSTS = [
+  {title:"G train 20+ min delays every morning for 3 weeks — is there a petition?",ups:"2.4k",comments:"312",sub:"r/nyc",url:"https://reddit.com/r/nyc"},
+  {title:"Landlord entered without notice for the 3rd time — what are Brooklyn tenants' actual legal options?",ups:"1.8k",comments:"245",sub:"r/brooklyn",url:"https://reddit.com/r/brooklyn"},
+  {title:"The Flushing Meadows restoration plan dropped — here's what's actually in it (vs the press release)",ups:"3.1k",comments:"178",sub:"r/queens",url:"https://reddit.com/r/queens"},
+  {title:"What happened to all the $1 slice spots? A serious investigation",ups:"5.2k",comments:"441",sub:"r/AskNYC",url:"https://reddit.com/r/AskNYC"},
+];
+
+// ═══════ RENDER FUNCTIONS ═══════
+
+function renderRedditPosts(){
+  const el = document.getElementById('redditPosts');
+  if(!el) return;
+  el.innerHTML = REDDIT_POSTS.map(p=>`
+    <div style="padding:8px 0;border-bottom:1px solid #2a2a1e;cursor:pointer;" onclick="window.open('${p.url}','_blank')">
+      <div style="font-size:12px;font-weight:600;color:var(--paper);margin-bottom:3px;line-height:1.4;">${p.title}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);display:flex;gap:10px;">
+        <span>⬆️ ${p.ups}</span><span>💬 ${p.comments}</span><span style="color:#FF4500;">${p.sub}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderReels(){
+  const grid = document.getElementById('reelsGrid');
+  if(!grid) return;
+  grid.innerHTML = REELS_DATA.map(r=>`
+    <div class="reel-card" onclick="window.open('${r.url}','_blank')">
+      <div class="reel-bg" style="background:${r.bg}">${r.emoji}</div>
+      <div class="reel-overlay"></div>
+      <div class="reel-src ${r.src}">${r.src==='tt'?'🎵 TikTok':'📸 IG Reels'}</div>
+      <div class="reel-hood">${r.hood}</div>
+      <div class="reel-play">▶</div>
+      <div class="reel-info">
+        <div class="reel-title">${r.title}</div>
+        <div class="reel-meta"><span>${r.user}</span><span>👁 ${r.views}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleReelFilter(btn, type){
+  btn.classList.toggle('on');
+  const showTT = document.querySelector('.rf-btn.tt-on').classList.contains('on');
+  const showIG = document.querySelector('.rf-btn.ig-on').classList.contains('on');
+  document.querySelectorAll('.reel-card').forEach((card,i)=>{
+    const src = REELS_DATA[i].src;
+    card.style.display = (src==='tt'&&showTT)||(src==='ig'&&showIG) ? '' : 'none';
+  });
+}
+
+function renderPodcasts(){
+  const feed = document.getElementById('podcastFeed');
+  if(!feed) return;
+  feed.innerHTML = PODCASTS_DATA.map(p=>`
+    <div class="card">
+      <div class="card-top">
+        <span class="tag ${p.tag}">Podcast</span>
+        <span class="hood-pill">${p.hood==='NYC-wide'?'📡':p.hood.includes('Queens')?'🟧':'🟦'} ${p.hood}</span>
+        <span class="src">🎙️ ${p.name}</span>
+      </div>
+      <div class="card-hl">${p.show}: ${p.ep}</div>
+      <div class="card-deck">${p.desc}</div>
+      ${p.spotify?`<div class="emb sp-emb"><div class="emb-lbl">🎵 Spotify</div><iframe style="border-radius:4px" src="${p.spotify}" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe></div>`:''}
+      <div class="pod-platform-row">
+        <a class="pod-link apple" href="${p.apple}" target="_blank">🎵 Apple Podcasts</a>
+        <a class="pod-link spotify" href="https://open.spotify.com/search/${encodeURIComponent(p.show)}" target="_blank">🎵 Spotify</a>
+        <a class="pod-link iheart" href="${p.iheart}" target="_blank">📻 iHeartRadio</a>
+        <a class="pod-link pocket" href="${p.pocket}" target="_blank">🎧 Pocket Casts</a>
+        <a class="pod-link overcast" href="${p.overcast}" target="_blank">☁️ Overcast</a>
+        <a class="pod-link castro" href="${p.rss}" target="_blank">📡 RSS</a>
+      </div>
+      <div class="card-acts">
+        <button class="act">♻️ Share</button><button class="act">💬 Discuss</button><button class="act" style="margin-left:auto">🔖</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderPhotos(filter='all'){
+  const board = document.getElementById('photoBoard');
+  if(!board) return;
+  const filtered = filter==='all' ? PHOTOS_DATA : PHOTOS_DATA.filter(p=>p.cat===filter);
+  board.innerHTML = filtered.map(p=>`
+    <div class="masonry-item" onclick="window.open('${p.url}','_blank')" style="height:${p.h}px;">
+      <div class="masonry-img" style="height:${p.h}px;background:${p.bg};display:flex;align-items:center;justify-content:center;font-size:52px;">${p.emoji}</div>
+      <div class="masonry-overlay">
+        <div class="m-caption">${p.caption}</div>
+        <div class="m-src">
+          <span class="m-src-dot" style="background:${p.src==='ig'?'var(--ig)':'#E60023'};"></span>
+          ${p.src==='ig'?'Instagram':'Pinterest'} · ${p.hood}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePF(btn, filter){
+  document.querySelectorAll('.pf-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderPhotos(filter);
+}
+
+function renderFreeEvents(filter='all'){
+  const list = document.getElementById('freeList');
+  if(!list) return;
+  let items = filter==='all' ? FREE_EVENTS :
+    filter==='today' ? FREE_EVENTS.filter(e=>['Today','Daily','Any day'].some(d=>e.date.includes(d))||e.date.includes('Mar')) :
+    filter==='weekend' ? FREE_EVENTS.filter(e=>e.date.includes('Sat')||e.date.includes('Sun')||e.date.includes('weekend')) :
+    FREE_EVENTS.filter(e=>e.cat===filter);
+  
+  const tagMap={art:'ft-art',outdoor:'ft-out',food:'ft-food',music:'ft-music',community:'ft-comm',kids:'ft-kids'};
+  list.innerHTML = items.map(e=>`
+    <div class="free-card" onclick="window.open('${e.url}','_blank')">
+      <div class="free-emoji">${e.emoji}</div>
+      <div class="free-body">
+        <div class="free-title">${e.title}</div>
+        <div class="free-meta">
+          <span class="free-tag ${tagMap[e.cat]||'ft-art'}">${e.cat}</span>
+          <span class="hood-pill">${e.hood}</span>
+        </div>
+        <div class="free-desc">${e.desc}</div>
+        <div class="free-src">
+          📍 Source: <a href="${e.url}" target="_blank" style="color:var(--teal);text-decoration:none;">${e.srcLbl} ↗</a>
+        </div>
+      </div>
+      <div class="free-right">
+        <div class="free-date">${e.date}</div>
+        <div class="free-time">${e.time}</div>
+        <div class="free-hood-pill">${e.hood}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterFree(btn, filter){
+  document.querySelectorAll('.ff-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderFreeEvents(filter);
+}
+
+// ═══════ NYC OPEN DATA ═══════
+async function loadOpenData(){
+  const el = document.getElementById('openDataRows');
+  try{
+    const today = new Date().toISOString().split('T')[0];
+    const res = await fetch(`https://data.cityofnewyork.us/resource/erm2-nwe9.json?$limit=8&$order=created_date+DESC&$where=created_date>'${today}'`);
+    const data = await res.json();
+    if(data&&data.length){
+      el.innerHTML = data.map(r=>{
+        const t = r.created_date?new Date(r.created_date).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'–';
+        const boro = (r.borough||'').replace('MANHATTAN','Manh.').replace('BROOKLYN','Bklyn').replace('QUEENS','Qns').replace('BRONX','Bronx').replace('STATEN ISLAND','S.I.');
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--amber);min-width:54px;">${t}</span>
+          <span style="color:var(--muted2);flex:1;">${(r.complaint_type||'Unknown').substring(0,38)}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">${boro}</span>
+        </div>`;
+      }).join('') + `<div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Live 311 data · <a href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9" target="_blank" style="color:var(--teal);">Full dataset ↗</a></div>`;
+    } else throw new Error();
+  }catch{
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;"><span style="font-family:'IBM Plex Mono',monospace;color:var(--amber);min-width:54px;">847</span><span style="color:var(--muted2);flex:1;">Noise - Residential</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Brooklyn</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;"><span style="font-family:'IBM Plex Mono',monospace;color:var(--amber);min-width:54px;">612</span><span style="color:var(--muted2);flex:1;">HEAT/HOT WATER complaints</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Bronx</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;"><span style="font-family:'IBM Plex Mono',monospace;color:var(--amber);min-width:54px;">398</span><span style="color:var(--muted2);flex:1;">Blocked Driveway</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Queens</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;"><span style="font-family:'IBM Plex Mono',monospace;color:var(--amber);min-width:54px;">287</span><span style="color:var(--muted2);flex:1;">Street Light Condition</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Manhattan</span></div>
+      <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Sample data (live API unavailable) · <a href="https://data.cityofnewyork.us" target="_blank" style="color:var(--teal);">NYC Open Data ↗</a></div>`;
+  }
+}
+
+async function loadHousingData(){
+  const el = document.getElementById('housingRows');
+  try{
+    const res = await fetch(`https://data.cityofnewyork.us/resource/wvxf-dwi5.json?$limit=6&$order=novissuancedate+DESC&$where=closedate is null`);
+    const data = await res.json();
+    if(data&&data.length){
+      el.innerHTML = data.map(r=>`
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a14;font-size:11px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--signal);min-width:40px;margin-top:1px;">${r.class||'C'}</span>
+          <span style="color:var(--muted2);flex:1;line-height:1.4;">${(r.novdescription||'Violation').substring(0,50)}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">${(r.borough||'').substring(0,5)}</span>
+        </div>`).join('') + `<div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">Open HPD violations (no close date) · <a href="https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5" target="_blank" style="color:var(--teal);">Full dataset ↗</a></div>`;
+    } else throw new Error();
+  }catch{
+    el.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);padding:10px 0;">Housing data unavailable — <a href="https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5" target="_blank" style="color:var(--teal);">Browse directly ↗</a></div>`;
+  }
+}
+
+// ═══════ WEATHER ═══════
+async function loadWeather(){
+  try{
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph');
+    const d = await res.json(); const w = d.current_weather;
+    const codes={0:'☀️ Clear',1:'🌤 Mostly Clear',2:'⛅ Partly Cloudy',3:'☁️ Overcast',45:'🌫 Foggy',51:'🌦 Drizzle',61:'🌧 Rain',71:'🌨 Snow',80:'🌦 Showers',95:'⛈ Storm'};
+    document.getElementById('wTemp').textContent=Math.round(w.temperature)+'°F';
+    document.getElementById('wInfo').innerHTML=(codes[w.weathercode]||'🌡️')+`<br>${w.windspeed}mph winds<br><span style="color:var(--teal)">NYC NOW</span>`;
+  }catch{document.getElementById('wInfo').innerHTML='NYC<br>Weather<br>unavailable';}
+}
+
+// ═══════ GEOLOCATION ═══════
+function detectZone(){
+  if(!navigator.geolocation){document.getElementById('locLabel').textContent='📍 NYC (location off)';return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    // rough NYC borough bounding boxes
+    let zone='NYC';
+    if(lat>40.7&&lat<40.88&&lng>-74.02&&lng<-73.91)zone='Manhattan';
+    else if(lat>40.57&&lat<40.74&&lng>-74.04&&lng<-73.83)zone='Brooklyn';
+    else if(lat>40.54&&lat<40.80&&lng>-73.96&&lng<-73.70)zone='Queens';
+    else if(lat>40.78&&lat<40.92&&lng>-73.93&&lng<-73.75)zone='The Bronx';
+    else if(lat>40.48&&lat<40.65&&lng>-74.26&&lng<-74.03)zone='Staten Island';
+    document.getElementById('locLabel').textContent=`📍 ${zone} (GPS)`;
+    document.getElementById('mSub').textContent=`ZONE: ${zone.toUpperCase()} · LOCALWIRE HYPERLOCAL SIGNAL`;
+  },()=>{document.getElementById('locLabel').textContent='📍 NYC (location denied)';});
+}
+
+// ═══════ NAV ═══════
+let curZone='nyc';
+function setZ(btn,zone){
+  document.querySelectorAll('.z-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  curZone=zone;
+  const names={nyc:'All NYC Signal Feed',manhattan:'Manhattan Feed',brooklyn:'Brooklyn Feed',queens:'Queens Feed',bronx:'The Bronx Feed',staten:'Staten Island Feed'};
+  document.getElementById('feedTitle').textContent=names[zone]||'All NYC Signal Feed';
+  document.getElementById('freeSub').textContent=`Showing free events in ${names[zone]||'NYC'}`;
+}
+
+function toggleHood(btn){
+  const dd=document.getElementById('hoodDd');
+  dd.classList.toggle('open');
+  setTimeout(()=>{
+    document.addEventListener('click',function h(e){if(!btn.contains(e.target)){dd.classList.remove('open');document.removeEventListener('click',h);}},{once:true});
+  },10);
+}
+
+function pickHood(hood,emoji){
+  document.getElementById('hoodBtn').textContent=`${emoji} ${hood} ▾`;
+  document.getElementById('hoodDd').classList.remove('open');
+  document.querySelectorAll('.hood-item').forEach(i=>i.classList.toggle('active',i.textContent.trim().startsWith(hood)));
+  document.querySelectorAll('.z-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('feedTitle').textContent=`${hood} Signal`;
+  document.getElementById('freeSub').textContent=`Free events near ${hood}`;
+  document.getElementById('locLabel').textContent=`📍 ${hood}`;
+}
+
+function switchTab(btn,tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='reels'&&!document.querySelector('.reel-card'))renderReels();
+  if(tab==='podcasts'&&!document.querySelector('.pod-platform-row'))renderPodcasts();
+  if(tab==='photos'&&!document.querySelector('.masonry-item'))renderPhotos();
+  if(tab==='free'&&!document.querySelector('.free-card'))renderFreeEvents();
+  if(tab==='data'){loadOpenData();loadHousingData();}
+}
+
+// MODAL
+function openModal(){document.getElementById('modalBg').classList.add('open');}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+function selFP(btn){document.querySelectorAll('.fp').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+
+// ═══════ BOOT ═══════
+loadWeather();
+detectZone();
+renderRedditPosts();
+
+// Load TikTok embed script
+const tts=document.createElement('script');tts.src='https://www.tiktok.com/embed.js';tts.async=true;document.head.appendChild(tts);
+// Load Pinterest
+const ps=document.createElement('script');ps.src='https://assets.pinterest.com/js/pinit.js';ps.async=true;ps.defer=true;document.head.appendChild(ps);
+
+// Boost interactions
+document.addEventListener('click',e=>{if(e.target.classList.contains('act')&&e.target.textContent.includes('⚡'))e.target.classList.toggle('on');});
+
+// Update free timestamp
+document.getElementById('freeLastUpdate').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+</script>
+</body>
+</html>
