@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1a0f">
+<title>trees</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ──────────────────────────────────────────
+   DESIGN TOKENS — organic dark, alive
+   ────────────────────────────────────────── */
+:root {
+  --forest:       #0d1a0f;
+  --bark:         #1a2a1c;
+  --bark2:        #243228;
+  --canopy:       #2e4232;
+  --moss:         #3d5a3e;
+  --moss2:        #4e7050;
+  --leaf:         #7aab7c;
+  --leaf2:        #9dc49f;
+  --sun:          #c8a84b;
+  --sun2:         #e8c870;
+  --amber:        #d4853a;
+  --amber2:       #f0a050;
+  --soil:         #8a6040;
+  --mist:         #b8caba;
+  --mist2:        #d4e4d6;
+  --white:        #f0f5f0;
+  --dim:          #6a8070;
+  --dimmer:       #4a5f50;
+  --pay-green:    #34d058;
+  --pay-dim:      #1a6a2a;
+
+  --font-serif:   'DM Serif Display', Georgia, serif;
+  --font-mono:    'DM Mono', monospace;
+  --font-body:    'DM Sans', sans-serif;
+
+  --radius:       16px;
+  --radius-sm:    10px;
+  --radius-xs:    6px;
+  --nav-height:   72px;
+  --safe-bottom:  env(safe-area-inset-bottom, 0px);
+  --safe-top:     env(safe-area-inset-top, 0px);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; overflow: hidden; }
+body {
+  height: 100%;
+  background: var(--forest);
+  color: var(--white);
+  font-family: var(--font-body);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── APP SHELL ── */
+#app {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--forest);
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(8px);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* ════════════════════════════════════════
+   SPLASH / LOCATION REQUEST
+   ════════════════════════════════════════ */
+#screen-splash {
+  background: var(--forest);
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  gap: 0;
+}
+
+.splash-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(61,90,62,0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(29,42,29,0.6) 0%, transparent 60%);
+}
+
+.tree-glyph {
+  font-size: 72px;
+  line-height: 1;
+  margin-bottom: 16px;
+  position: relative;
+  animation: sway 4s ease-in-out infinite;
+}
+@keyframes sway {
+  0%,100% { transform: rotate(-1.5deg); }
+  50%      { transform: rotate(1.5deg); }
+}
+
+.splash-name {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-style: italic;
+  color: var(--white);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.splash-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.loc-request-card {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  width: 100%;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.loc-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.loc-icon-bg {
+  width: 44px; height: 44px;
+  background: var(--canopy);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.loc-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 2px;
+}
+.loc-sub {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+.loc-why {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dimmer);
+  line-height: 1.7;
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--canopy);
+}
+.loc-why span { color: var(--leaf2); }
+
+.btn-loc {
+  width: 100%;
+  background: var(--moss);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+  margin-bottom: 10px;
+}
+.btn-loc:active { transform: scale(0.98); background: var(--moss2); }
+
+.btn-skip {
+  width: 100%;
+  background: transparent;
+  color: var(--dimmer);
+  border: none;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.btn-skip:active { color: var(--dim); }
+
+.loc-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(122,171,124,0.1);
+  border: 1px solid rgba(122,171,124,0.2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--leaf2);
+  width: 100%;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.loc-status.show { opacity: 1; }
+.loc-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--leaf);
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+/* ════════════════════════════════════════
+   ONBOARDING STEPS
+   ════════════════════════════════════════ */
+#screen-onboard {
+  background: var(--forest);
+  overflow-y: auto;
+  padding: calc(var(--safe-top) + 20px) 24px 32px;
+}
+
+.ob-step { display: none; animation: fadeSlide 0.35s ease-out; }
+.ob-step.active { display: block; }
+@keyframes fadeSlide { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+
+.ob-progress {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+}
+.ob-prog-dot {
+  height: 3px;
+  border-radius: 2px;
+  flex: 1;
+  background: var(--bark2);
+  transition: background 0.3s;
+}
+.ob-prog-dot.done { background: var(--moss); }
+.ob-prog-dot.active { background: var(--leaf); }
+
+.ob-icon { font-size: 40px; margin-bottom: 16px; }
+.ob-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.ob-body {
+  font-size: 15px;
+  color: var(--mist);
+  line-height: 1.75;
+  margin-bottom: 24px;
+}
+.ob-body strong { color: var(--white); font-weight: 600; }
+
+.ob-card {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.ob-card:active { transform: scale(0.99); }
+.ob-card.sel {
+  border-color: var(--leaf);
+  background: rgba(122,171,124,0.08);
+}
+.ob-card.sel::after {
+  content: '✓';
+  position: absolute;
+  top: 14px; right: 14px;
+  color: var(--leaf);
+  font-size: 14px;
+  font-weight: 700;
+}
+.ob-card-icon {
+  width: 40px; height: 40px;
+  background: var(--canopy);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.ob-card-title { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+.ob-card-sub { font-size: 13px; color: var(--dim); line-height: 1.4; }
+
+.ob-discovery-card {
+  background: linear-gradient(135deg, var(--bark) 0%, rgba(61,90,62,0.3) 100%);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.ob-disc-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.ob-disc-name {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-style: italic;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.ob-disc-detail { font-size: 13px; color: var(--mist2); line-height: 1.6; }
+
+/* Earn explainer */
+.earn-breakdown {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.earn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--bark2);
+}
+.earn-row:last-child { border-bottom: none; }
+.earn-icon { font-size: 18px; width: 28px; text-align: center; }
+.earn-label { font-size: 14px; color: var(--mist); flex: 1; }
+.earn-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--pay-green);
+  font-weight: 500;
+}
+
+/* Contribution wall */
+.contrib-wall {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.cw-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.cw-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cw-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--bark2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--dimmer);
+  transition: all 0.2s;
+}
+.cw-cell.filled { background: var(--moss); }
+.cw-cell.filled.high { background: var(--leaf); }
+.cw-cell.this-week {
+  border: 1.5px solid var(--leaf);
+  background: rgba(122,171,124,0.12);
+  color: var(--leaf2);
+}
+.cw-cell.missed { background: rgba(210,80,50,0.25); }
+
+.btn-primary {
+  width: 100%;
+  background: var(--leaf);
+  color: var(--forest);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+.btn-primary:active { transform: scale(0.98); filter: brightness(0.95); }
+
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--leaf2);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+.btn-secondary:active { background: var(--bark2); }
+
+/* ════════════════════════════════════════
+   MAIN APP
+   ════════════════════════════════════════ */
+#screen-main {
+  background: var(--forest);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+
+/* TOP BAR */
+.top-bar {
+  padding: calc(var(--safe-top) + 14px) 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--forest);
+  position: relative;
+  z-index: 10;
+}
+.top-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--bark2), transparent);
+}
+.tb-wordmark {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-style: italic;
+  color: var(--white);
+  letter-spacing: -0.5px;
+}
+.tb-loc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--leaf2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tb-loc:active { background: var(--bark2); }
+.tb-loc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--leaf);
+  animation: pulse 1.5s infinite;
+}
+.tb-earn {
+  background: rgba(52, 208, 88, 0.12);
+  border: 1px solid rgba(52, 208, 88, 0.25);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--pay-green);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* LOCALITY SWITCHER */
+.locality-tabs {
+  display: flex;
+  gap: 0;
+  padding: 8px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.locality-tabs::-webkit-scrollbar { display: none; }
+.loc-tab {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--dimmer);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.loc-tab:active { background: var(--bark2); }
+.loc-tab.active {
+  background: var(--canopy);
+  color: var(--leaf2);
+}
+
+/* FORMAT PILLS */
+.format-pills {
+  display: flex;
+  gap: 6px;
+  padding: 6px 20px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.format-pills::-webkit-scrollbar { display: none; }
+.fp {
+  flex-shrink: 0;
+  background: var(--bark);
+  border: 1px solid var(--bark2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fp:active { transform: scale(0.96); }
+.fp.active {
+  background: var(--canopy);
+  border-color: var(--moss);
+  color: var(--leaf2);
+}
+
+/* WEEK BANNER */
+.week-banner {
+  margin: 0 16px 12px;
+  background: linear-gradient(135deg, var(--bark) 0%, rgba(61,90,62,0.2) 100%);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wb-left {}
+.wb-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 3px;
+}
+.wb-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wb-flame { font-size: 16px; }
+.wb-tenure {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+}
+.wb-right {
+  text-align: right;
+}
+.wb-pool {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+.wb-reset {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dimmer);
+}
+
+/* CONTRIBUTION NUDGE */
+.contrib-nudge {
+  margin: 0 16px 12px;
+  background: linear-gradient(135deg, rgba(212,133,58,0.15) 0%, rgba(200,100,30,0.08) 100%);
+  border: 1px solid rgba(212,133,58,0.35);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.contrib-nudge:active { transform: scale(0.99); }
+.cn-icon {
+  width: 38px; height: 38px;
+  background: rgba(212,133,58,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.cn-text-block {}
+.cn-headline {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--amber2);
+  margin-bottom: 2px;
+}
+.cn-sub {
+  font-size: 12px;
+  color: var(--amber);
+  opacity: 0.8;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.cn-arrow {
+  margin-left: auto;
+  color: var(--amber);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.cn-days-left {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--amber);
+  opacity: 0.7;
+  letter-spacing: 0.06em;
+}
+
+/* FEED */
+.feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 8px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.feed::-webkit-scrollbar { display: none; }
+
+/* CONTENT CARDS */
+.card {
+  margin: 0 16px 10px;
+  background: var(--bark);
+  border: 1px solid var(--bark2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s;
+  position: relative;
+}
+.card:active { transform: scale(0.99); }
+.card.torch {
+  border-color: var(--amber);
+  background: linear-gradient(160deg, rgba(200,168,75,0.08) 0%, var(--bark) 40%);
+}
+.card.emeritus {
+  opacity: 0.75;
+  border-color: var(--bark2);
+}
+
+.card-torch-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.card-media {
+  width: 100%;
+  background: var(--bark2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.card-media.ratio-16-9 { aspect-ratio: 16/9; }
+.card-media.ratio-4-3 { aspect-ratio: 4/3; }
+.card-media.ratio-square { aspect-ratio: 1; }
+.card-media-emoji {
+  font-size: 56px;
+  opacity: 0.6;
+}
+.card-media-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+}
+.card-play {
+  position: absolute;
+  width: 50px; height: 50px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  backdrop-filter: blur(4px);
+}
+.card-duration {
+  position: absolute;
+  bottom: 10px; right: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* Short video - vertical layout */
+.card-short {
+  display: flex;
+  gap: 0;
+}
+.card-short-thumb {
+  width: 90px;
+  min-height: 140px;
+  background: var(--bark2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  opacity: 0.7;
+  position: relative;
+}
+.card-short-body { flex: 1; padding: 14px; }
+
+/* Photo grid */
+.photo-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.photo-cell {
+  aspect-ratio: 1;
+  background: var(--bark2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  opacity: 0.65;
+}
+.photo-cell.tall { grid-row: span 2; aspect-ratio: auto; }
+.photo-more {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-more-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  color: white;
+}
+
+.card-body { padding: 14px; }
+.card-format-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.card-fmt-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+}
+.fmt-short   { color: #7a9fc0; }
+.fmt-photo   { color: var(--leaf2); }
+.fmt-essay   { color: var(--amber); }
+.fmt-long    { color: var(--dim); }
+.fmt-event   { color: var(--moss2); }
+.card-loc-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.05em;
+}
+.card-tenure-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--moss2);
+  margin-left: auto;
+}
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+.card-excerpt {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.65;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dimmer);
+}
+.emeritus-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--soil);
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border: 1px solid rgba(138,96,64,0.3);
+  border-radius: 4px;
+}
+
+/* HIDDEN ENGAGEMENT BUTTON */
+.eng-btn {
+  position: absolute;
+  bottom: 12px; right: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.eng-btn.show { opacity: 1; pointer-events: all; }
+.eng-btn:active { background: rgba(122,171,124,0.15); color: var(--leaf2); }
+
+/* CITATION STRIP */
+.citation-strip {
+  margin: 0 14px 14px;
+  padding: 9px 12px;
+  background: rgba(122,171,124,0.06);
+  border: 1px solid rgba(122,171,124,0.15);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--dim);
+  cursor: pointer;
+}
+.citation-strip:active { background: rgba(122,171,124,0.1); }
+.cs-bar { width: 3px; height: 14px; background: var(--amber); border-radius: 2px; flex-shrink: 0; }
+
+/* EVENT META */
+.event-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.event-chip {
+  background: var(--bark2);
+  border: 1px solid var(--canopy);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--mist);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.event-free-chip {
+  background: rgba(61,90,62,0.3);
+  border-color: var(--moss);
+  color: var(--leaf2);
+}
+
+/* LOAD MORE */
+.load-more-row {
+  margin: 8px 16px;
+  background: var(--bark);
+  border: 1px solid var(--bark2);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.load-more-row:active { background: var(--bark2); }
+.lm-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.lm-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dimmer);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  background: var(--bark);
+  border-top: 1px solid var(--canopy);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 10px;
+  z-index: 100;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.nav-item:active { opacity: 0.6; }
+.nav-icon {
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+.nav-item.active .nav-icon { transform: scale(1.1); }
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  transition: color 0.15s;
+}
+.nav-item.active .nav-label { color: var(--leaf2); }
+
+/* POST NAV ITEM - special */
+.nav-post-wrap {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0;
+  margin-top: -20px;
+}
+.nav-post-btn {
+  width: 54px; height: 54px;
+  background: var(--leaf);
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 20px rgba(122,171,124,0.4), 0 0 0 4px var(--bark);
+  transition: all 0.15s;
+}
+.nav-post-btn:active { transform: scale(0.94); box-shadow: 0 2px 10px rgba(122,171,124,0.3), 0 0 0 4px var(--bark); }
+.nav-post-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--leaf2);
+  margin-top: 3px;
+}
+
+/* ════════════════════════════════════════
+   EARN TAB
+   ════════════════════════════════════════ */
+#screen-earn {
+  overflow-y: auto;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+.earn-header {
+  padding: calc(var(--safe-top) + 16px) 20px 16px;
+  border-bottom: 1px solid var(--bark2);
+}
+.earn-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-style: italic;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.earn-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+}
+
+.balance-card {
+  margin: 16px;
+  background: linear-gradient(135deg, var(--pay-dim) 0%, rgba(26,106,42,0.4) 100%);
+  border: 1px solid rgba(52,208,88,0.25);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.balance-card::before {
+  content: '$';
+  position: absolute;
+  right: -10px; top: -20px;
+  font-family: var(--font-serif);
+  font-size: 120px;
+  color: rgba(52,208,88,0.06);
+  line-height: 1;
+}
+.bal-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(52,208,88,0.6);
+  margin-bottom: 6px;
+}
+.bal-amount {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  color: var(--pay-green);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.bal-period {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(52,208,88,0.5);
+  letter-spacing: 0.06em;
+}
+.bal-pending {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(52,208,88,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.bal-pend-label { color: rgba(52,208,88,0.5); }
+.bal-pend-val { color: var(--pay-green); font-weight: 500; }
+
+.earn-section {
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+.earn-sec-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+  padding: 12px 0 0;
+}
+
+.how-paid-card {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.hp-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+.hp-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bark2);
+}
+.hp-row:last-child { border-bottom: none; }
+.hp-icon { font-size: 18px; width: 24px; flex-shrink: 0; }
+.hp-body { flex: 1; }
+.hp-label { font-size: 13px; color: var(--white); font-weight: 500; margin-bottom: 2px; }
+.hp-detail { font-size: 12px; color: var(--dim); line-height: 1.5; }
+.hp-rate {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--pay-green);
+  font-weight: 500;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.weekly-log {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.wl-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bark2);
+  gap: 10px;
+}
+.wl-row:last-child { border-bottom: none; }
+.wl-week { font-family: var(--font-mono); font-size: 11px; color: var(--dim); width: 60px; }
+.wl-bar-wrap { flex: 1; height: 4px; background: var(--bark2); border-radius: 2px; }
+.wl-bar { height: 100%; background: var(--pay-green); border-radius: 2px; opacity: 0.6; }
+.wl-amt { font-family: var(--font-mono); font-size: 12px; color: var(--pay-green); font-weight: 500; min-width: 48px; text-align: right; }
+.wl-row.this-week .wl-amt { color: var(--amber2); }
+.wl-row.this-week .wl-week { color: var(--amber); }
+
+.cashout-card {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.cashout-rule {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.cashout-btn {
+  width: 100%;
+  background: rgba(52,208,88,0.15);
+  border: 1px solid rgba(52,208,88,0.3);
+  color: var(--pay-green);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cashout-btn:active { background: rgba(52,208,88,0.25); }
+
+/* ════════════════════════════════════════
+   ARCHIVE TAB
+   ════════════════════════════════════════ */
+#screen-archive {
+  overflow-y: auto;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+.archive-header {
+  padding: calc(var(--safe-top) + 16px) 20px 16px;
+  border-bottom: 1px solid var(--bark2);
+}
+.archive-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-style: italic;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.archive-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+}
+
+.yearbook-banner {
+  margin: 16px 16px 12px;
+  background: linear-gradient(135deg, var(--bark2) 0%, rgba(30,50,30,0.8) 100%);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.yearbook-banner:active { transform: scale(0.99); }
+.yb-year-num {
+  font-family: var(--font-serif);
+  font-size: 52px;
+  font-style: italic;
+  color: var(--canopy);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.yb-text {}
+.yb-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
+.yb-name { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+.yb-detail { font-size: 12px; color: var(--dim); }
+
+.archive-grid {
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.arc-card {
+  background: var(--bark);
+  border: 1px solid var(--bark2);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.arc-card:active { transform: scale(0.98); background: var(--bark2); }
+.arc-card.emeritus { border-left: 3px solid var(--soil); opacity: 0.8; }
+.arc-fmt { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.arc-title { font-family: var(--font-serif); font-size: 14px; font-style: italic; color: var(--white); line-height: 1.4; margin-bottom: 6px; }
+.arc-week { font-family: var(--font-mono); font-size: 10px; color: var(--dimmer); }
+
+/* ════════════════════════════════════════
+   PROFILE TAB
+   ════════════════════════════════════════ */
+#screen-profile {
+  overflow-y: auto;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+.profile-header {
+  padding: calc(var(--safe-top) + 20px) 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid var(--bark2);
+}
+.profile-avatar {
+  width: 72px; height: 72px;
+  background: var(--canopy);
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin-bottom: 14px;
+  border: 2px solid var(--moss);
+}
+.profile-name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.profile-tenure {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--moss2);
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+.profile-week-ring {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 16px;
+}
+.pwr-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bark2);
+}
+.pwr-dot.filled { background: var(--moss2); }
+.pwr-dot.current { background: var(--leaf); }
+
+.profile-localities {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ploc-pill {
+  background: var(--bark);
+  border: 1px solid var(--canopy);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--leaf2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--bark2);
+}
+.ps-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+/* ════════════════════════════════════════
+   COMPOSE SHEET
+   ════════════════════════════════════════ */
+.compose-sheet {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 430px;
+  background: var(--bark);
+  border-top: 1px solid var(--canopy);
+  border-radius: var(--radius) var(--radius) 0 0;
+  z-index: 300;
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  padding-bottom: calc(var(--safe-bottom) + 16px);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.compose-sheet.open {
+  transform: translateX(-50%) translateY(0);
+}
+.compose-handle {
+  width: 36px; height: 4px;
+  background: var(--bark2);
+  border-radius: 2px;
+  margin: 12px auto 16px;
+}
+.compose-header {
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--bark2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.compose-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--white);
+}
+.compose-gps {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--leaf2);
+}
+.compose-gps-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); animation: pulse 1.2s infinite; }
+.compose-fmts {
+  display: flex;
+  gap: 0;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--bark2);
+}
+.compose-fmts::-webkit-scrollbar { display: none; }
+.cfmt {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cfmt:active { transform: scale(0.96); }
+.cfmt.sel { background: var(--canopy); }
+.cfmt-icon { font-size: 22px; }
+.cfmt-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dimmer); }
+.cfmt.sel .cfmt-label { color: var(--leaf2); }
+
+.compose-body {
+  padding: 16px 20px;
+}
+.compose-upload {
+  width: 100%;
+  background: var(--bark2);
+  border: 1.5px dashed var(--canopy);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.15s;
+}
+.compose-upload:active { background: var(--canopy); border-style: solid; }
+.cup-icon { font-size: 32px; margin-bottom: 8px; }
+.cup-label { font-size: 14px; color: var(--dim); margin-bottom: 3px; }
+.cup-sub { font-family: var(--font-mono); font-size: 11px; color: var(--dimmer); letter-spacing: 0.04em; }
+
+.compose-ta {
+  width: 100%;
+  background: var(--bark2);
+  border: 1px solid var(--canopy);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  resize: none;
+  outline: none;
+  min-height: 80px;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+.compose-ta:focus { border-color: var(--moss); }
+.compose-ta::placeholder { color: var(--dimmer); }
+
+.compose-locality-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(122,171,124,0.08);
+  border: 1px solid rgba(122,171,124,0.15);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--leaf2);
+  margin-bottom: 14px;
+}
+.compose-post-btn {
+  width: 100%;
+  background: var(--leaf);
+  color: var(--forest);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.compose-post-btn:active { transform: scale(0.98); filter: brightness(0.95); }
+.compose-post-btn.missed-week {
+  background: var(--amber);
+}
+
+/* WEEKLY REQUIREMENT notice */
+.weekly-req-notice {
+  margin: 0 20px 12px;
+  padding: 10px 12px;
+  background: rgba(212,133,58,0.1);
+  border: 1px solid rgba(212,133,58,0.25);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+/* SHEET BACKDROP */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 200;
+  pointer-events: none;
+  transition: background 0.35s;
+}
+.sheet-backdrop.open {
+  background: rgba(0,0,0,0.6);
+  pointer-events: all;
+}
+
+/* CITATION MODAL */
+.modal-sheet {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 430px;
+  background: var(--bark);
+  border-top: 1px solid var(--canopy);
+  border-radius: var(--radius) var(--radius) 0 0;
+  z-index: 400;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding-bottom: calc(var(--safe-bottom) + 20px);
+  max-height: 80dvh;
+  overflow-y: auto;
+}
+.modal-sheet.open { transform: translateX(-50%) translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: var(--bark2); border-radius: 2px; margin: 12px auto 16px; }
+.modal-body { padding: 0 20px 8px; }
+.modal-title { font-family: var(--font-serif); font-size: 20px; font-style: italic; color: var(--white); margin-bottom: 6px; }
+.modal-sub { font-family: var(--font-mono); font-size: 11px; color: var(--dim); letter-spacing: 0.04em; margin-bottom: 16px; line-height: 1.6; }
+
+.citation-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bark2);
+}
+.citation-item:last-child { border-bottom: none; }
+.ci-from { font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: 0.06em; margin-bottom: 5px; }
+.ci-title { font-family: var(--font-serif); font-size: 15px; font-style: italic; color: var(--white); margin-bottom: 4px; }
+.ci-excerpt { font-size: 13px; color: var(--dim); line-height: 1.6; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 60px);
+  left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--bark2);
+  border: 1px solid var(--canopy);
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--leaf2);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 500;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ANIMATIONS */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--bark2) 25%, var(--canopy) 50%, var(--bark2) 75%);
+  background-size: 200%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════════ SPLASH / LOCATION ═══════════════ -->
+<div id="screen-splash" class="screen active">
+  <div class="splash-bg"></div>
+  <div class="tree-glyph">🌳</div>
+  <div class="splash-name">trees</div>
+  <div class="splash-tag">your place · your voice · your roots</div>
+
+  <div class="loc-request-card">
+    <div class="loc-icon-row">
+      <div class="loc-icon-bg">📍</div>
+      <div>
+        <div class="loc-title">trees needs your location</div>
+        <div class="loc-sub">To connect you to your local community</div>
+      </div>
+    </div>
+    <div class="loc-why">
+      Location is used <span>only to verify you're present</span> in your locality when you post. It's never stored, sold, or shown to other users. You control when it's active.
+    </div>
+    <button class="btn-loc" id="btnRequestLoc" onclick="requestLocation()">
+      <span>📍</span> Allow Location Access
+    </button>
+    <button class="btn-skip" onclick="skipLocation()">Continue without location · posting will be disabled</button>
+    <div class="loc-status" id="locStatus">
+      <div class="loc-dot"></div>
+      <span id="locStatusText">Locating...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ONBOARDING ═══════════════ -->
+<div id="screen-onboard" class="screen">
+  <div class="ob-progress" id="obProgress">
+    <div class="ob-prog-dot active"></div>
+    <div class="ob-prog-dot"></div>
+    <div class="ob-prog-dot"></div>
+    <div class="ob-prog-dot"></div>
+  </div>
+
+  <!-- Step 0 -->
+  <div class="ob-step active" id="ob-0">
+    <div class="ob-icon">🌳</div>
+    <div class="ob-title">This is trees.</div>
+    <div class="ob-body">
+      A <strong>place-based platform</strong> where you belong to three localities — and can only post from within them.<br><br>
+      No followers. No likes. No algorithmic competition. Just <strong>your neighborhood, your voice, your week.</strong><br><br>
+      One contribution per week is required to stay active. <strong>You get paid</strong> for what you make — through ad revenue your content generates.
+    </div>
+    <div class="earn-breakdown">
+      <div class="earn-row">
+        <span class="earn-icon">👁️</span>
+        <span class="earn-label">Ad impressions on your content</span>
+        <span class="earn-val">~$1.20 / 1k views</span>
+      </div>
+      <div class="earn-row">
+        <span class="earn-icon">⏱️</span>
+        <span class="earn-label">Time-on-content bonus</span>
+        <span class="earn-val">+30% multiplier</span>
+      </div>
+      <div class="earn-row">
+        <span class="earn-icon">🔥</span>
+        <span class="earn-label">Torchbearer week amplifier</span>
+        <span class="earn-val">3× distribution</span>
+      </div>
+      <div class="earn-row">
+        <span class="earn-icon">📖</span>
+        <span class="earn-label">Archive page views (forever)</span>
+        <span class="earn-val">ongoing</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="obNext(1)">Let's begin →</button>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="ob-step" id="ob-1">
+    <div class="ob-icon">🏠</div>
+    <div class="ob-title">Your home locality.</div>
+    <div class="ob-body">Based on your GPS, we found your neighborhood. This is where your roots go deepest.</div>
+    <div class="ob-card sel" id="homeLocCard">
+      <div class="ob-card-icon">🏠</div>
+      <div>
+        <div class="ob-card-title" id="homeLocName">Williamsburg, Brooklyn</div>
+        <div class="ob-card-sub">GPS verified · your permanent home community · changeable once per year</div>
+      </div>
+    </div>
+    <div class="ob-body" style="font-size:13px;">You can post here whenever you're physically present.</div>
+    <button class="btn-primary" onclick="obNext(2)">This is home →</button>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="ob-step" id="ob-2">
+    <div class="ob-icon">📍</div>
+    <div class="ob-title">A second place you return to.</div>
+    <div class="ob-body">Work, school, a neighborhood you grew up in. You must be physically present to post here.</div>
+    <div class="ob-card" onclick="selectOb(this)" id="att1">
+      <div class="ob-card-icon">💼</div>
+      <div>
+        <div class="ob-card-title">Lower East Side, Manhattan</div>
+        <div class="ob-card-sub">Detected from your recent movement patterns</div>
+      </div>
+    </div>
+    <div class="ob-card" onclick="selectOb(this)" id="att2">
+      <div class="ob-card-icon">📍</div>
+      <div>
+        <div class="ob-card-title">Crown Heights, Brooklyn</div>
+        <div class="ob-card-sub">Frequently visited location</div>
+      </div>
+    </div>
+    <div class="ob-card" onclick="selectOb(this)" id="att3">
+      <div class="ob-card-icon">✏️</div>
+      <div>
+        <div class="ob-card-title">Enter a different neighborhood</div>
+        <div class="ob-card-sub">You'll verify on your first post there</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="obNext(3)" style="margin-top:16px;">Choose this place →</button>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="ob-step" id="ob-3">
+    <div class="ob-icon">🎲</div>
+    <div class="ob-title">Your discovery community.</div>
+    <div class="ob-body">Randomly assigned. You didn't choose it — that's the point. Swap once every 90 days.</div>
+    <div class="ob-discovery-card">
+      <div class="ob-disc-label">🎲 Randomly assigned</div>
+      <div class="ob-disc-name">Jackson Heights, Queens</div>
+      <div class="ob-disc-detail">The most linguistically diverse neighborhood on Earth. 160+ languages spoken within a half-mile radius of 74th St and Roosevelt Ave.</div>
+    </div>
+    <div class="weekly-req-notice">
+      🌱 <strong>Weekly requirement:</strong> You must post at least once per week across any of your three localities. Missing a week pauses your earnings and reduces your pool visibility. Two consecutive missed weeks removes you from active circulation until you return.
+    </div>
+    <button class="btn-primary" onclick="enterApp()">Enter trees →</button>
+    <button class="btn-secondary" onclick="enterApp()">Re-roll discovery (1 left this month)</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="screen-main" class="screen">
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;" id="mainScroll">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="tb-wordmark">trees</div>
+      <div class="tb-loc" onclick="showToast('📍 GPS active — Williamsburg, Brooklyn')">
+        <div class="tb-loc-dot"></div>
+        <span id="topBarLoc">Williamsburg</span>
+      </div>
+      <div class="tb-earn" onclick="switchTab('earn')">$4.18</div>
+    </div>
+
+    <!-- LOCALITY TABS -->
+    <div class="locality-tabs">
+      <button class="loc-tab active" onclick="setLocality(this,'home')">🏠 Home</button>
+      <button class="loc-tab" onclick="setLocality(this,'attach')">📍 LES</button>
+      <button class="loc-tab" onclick="setLocality(this,'discover')">🎲 Jackson Hts</button>
+    </div>
+
+    <!-- FORMAT PILLS -->
+    <div class="format-pills">
+      <button class="fp active" onclick="setFmt(this,'all')">All</button>
+      <button class="fp" onclick="setFmt(this,'short')">▶ Short</button>
+      <button class="fp" onclick="setFmt(this,'photo')">◻ Photos</button>
+      <button class="fp" onclick="setFmt(this,'essay')">✎ Essays</button>
+      <button class="fp" onclick="setFmt(this,'long')">▶▶ Long</button>
+      <button class="fp" onclick="setFmt(this,'event')">◇ Events</button>
+    </div>
+
+    <!-- WEEK BANNER -->
+    <div class="week-banner">
+      <div class="wb-left">
+        <div class="wb-label">Week of Mar 17–23</div>
+        <div class="wb-name"><span class="wb-flame">🔥</span>Elena V. <span class="wb-tenure">wk 34</span></div>
+      </div>
+      <div class="wb-right">
+        <div class="wb-pool">47 in pool</div>
+        <div class="wb-reset">resets Mon 12am</div>
+      </div>
+    </div>
+
+    <!-- WEEKLY CONTRIBUTION NUDGE -->
+    <div class="contrib-nudge" onclick="openCompose()" id="contribNudge">
+      <div class="cn-icon">🌱</div>
+      <div class="cn-text-block">
+        <div class="cn-headline">Post this week to keep earning</div>
+        <div class="cn-sub">4 days left · week 1 of your roots</div>
+      </div>
+      <div class="cn-arrow">→</div>
+    </div>
+
+    <!-- ── TORCHBEARER CARD ── -->
+    <div class="card torch" data-fmt="essay" id="card-torch">
+      <div class="card-torch-badge">🔥 Torchbearer · Week of Mar 17</div>
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-essay">Essay</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="card-tenure-pill">34 wks</span>
+        </div>
+        <div class="card-title">The Bagel Shop on Bedford That Nobody Talks About Anymore</div>
+        <div class="card-excerpt">There's a place on Bedford that's been there since before the coffee shops, before the galleries, before the entire transformation of this neighborhood into what it is now. I walked past it yesterday and noticed the sign is finally faded past legibility...</div>
+        <div class="card-meta-row">
+          <span>Essay · 800 words</span>
+          <span>·</span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+      <div class="citation-strip" onclick="openCitations(event)">
+        <div class="cs-bar"></div>
+        <span>3 cross-community responses — Crown Heights, Jackson Heights, Astoria</span>
+      </div>
+      <button class="eng-btn" id="eng-torch">I read this</button>
+    </div>
+
+    <!-- ── SHORT VIDEO ── -->
+    <div class="card" data-fmt="short" id="card-1">
+      <div class="card-short">
+        <div class="card-short-thumb" style="background:linear-gradient(160deg,#1a2a1c,#0d1a0f);">
+          🌃
+          <div style="position:absolute;bottom:6px;right:6px;font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5);background:rgba(0,0,0,.4);padding:2px 5px;border-radius:3px;">0:48</div>
+        </div>
+        <div class="card-short-body">
+          <div class="card-format-row">
+            <span class="card-fmt-pill fmt-short">Short</span>
+            <span class="card-loc-pill">Williamsburg</span>
+            <span class="card-tenure-pill">12 wks</span>
+          </div>
+          <div class="card-title">The L platform at 8am — a Wednesday</div>
+          <div class="card-excerpt" style="-webkit-line-clamp:2;">48 seconds. No narration. Just the sound of the train leaving and the platform emptying into silence.</div>
+          <div class="card-meta-row">
+            <span>2 days ago</span>
+          </div>
+        </div>
+      </div>
+      <button class="eng-btn" id="eng-1">I watched this</button>
+    </div>
+
+    <!-- ── PHOTO BOARD ── -->
+    <div class="card" data-fmt="photo" id="card-2">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:2px;">
+        <div class="photo-cell tall" style="background:linear-gradient(160deg,#2a3a1e,#1a2810);font-size:48px;opacity:.6;min-height:160px;">🌇</div>
+        <div style="display:grid;gap:2px;">
+          <div class="photo-cell" style="background:linear-gradient(135deg,#1e2e1e,#0e1e0e);">🚢</div>
+          <div class="photo-cell photo-more" style="background:linear-gradient(135deg,#1e2820,#0e1810);">🌊
+            <div class="photo-more-overlay">+5</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-photo">Photos</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="card-tenure-pill">7 wks</span>
+        </div>
+        <div class="card-title">October light on the waterfront — a week in frames</div>
+        <div class="card-meta-row"><span>7 photos</span><span>·</span><span>3 days ago</span></div>
+      </div>
+      <button class="eng-btn" id="eng-2">I looked at this</button>
+    </div>
+
+    <!-- ── ESSAY ── -->
+    <div class="card" data-fmt="essay" id="card-3">
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-essay">Essay</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="card-tenure-pill">22 wks</span>
+        </div>
+        <div class="card-title">On the coffee shop that is also a real estate office now</div>
+        <div class="card-excerpt">You know the one. There's the pour-over bar on one side and floor-to-ceiling renderings of luxury condos on the other. I've been trying to write about this specific space for six months because it seems like the most honest thing I've seen in this neighborhood in years — an admission that these two things were always the same project.</div>
+        <div class="card-meta-row"><span>Essay · ~800 words</span><span>·</span><span>4 days ago</span></div>
+      </div>
+      <button class="eng-btn" id="eng-3">I read this</button>
+    </div>
+
+    <!-- ── EVENT ── -->
+    <div class="card" data-fmt="event" id="card-4">
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-event">Event</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="card-tenure-pill">5 wks</span>
+        </div>
+        <div class="card-title">Community Board 1 — Zoning Variance Discussion</div>
+        <div class="event-chips">
+          <div class="event-chip">📅 Thu Mar 20 · 6:30pm</div>
+          <div class="event-chip">📍 MS 50 · 183 S 3rd St</div>
+          <div class="event-chip event-free-chip">Free · Open to all</div>
+        </div>
+        <div class="card-excerpt" style="-webkit-line-clamp:2;">The three proposed variances on Bedford and Metropolitan are on the agenda. The one affecting the block between N 6th and N 7th is the key one.</div>
+      </div>
+      <button class="eng-btn" id="eng-4">I'm going</button>
+    </div>
+
+    <!-- ── EMERITUS ── -->
+    <div class="card emeritus" data-fmt="essay" id="card-5">
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-essay">Essay</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="emeritus-tag">◎ Emeritus</span>
+          <span class="card-tenure-pill" style="color:var(--soil);">78 wks</span>
+        </div>
+        <div class="card-title">The Grocery Store I Photographed Every Week for a Year</div>
+        <div class="card-excerpt" style="font-style:italic;color:var(--dimmer);">This post is preserved in the community archive. Its author has graduated to emeritus status — their work remains part of this neighborhood's permanent record but no longer circulates in the active feed.</div>
+        <div class="card-meta-row" style="color:var(--soil);">
+          <span>◎ Archived · Mar 2025</span>
+          <span>·</span>
+          <span>View in archive →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LONG VIDEO ── -->
+    <div class="card" data-fmt="long" id="card-6">
+      <div class="card-media ratio-16-9" style="background:linear-gradient(160deg,#1e2a20,#0e1a10);">
+        <div class="card-media-emoji">🌉</div>
+        <div class="card-media-overlay"></div>
+        <div class="card-play">▶</div>
+        <div class="card-duration">1:02:14</div>
+      </div>
+      <div class="card-body">
+        <div class="card-format-row">
+          <span class="card-fmt-pill fmt-long">Long Video</span>
+          <span class="card-loc-pill">Williamsburg</span>
+          <span class="card-tenure-pill">16 wks</span>
+        </div>
+        <div class="card-title">An hour on the Williamsburg Bridge — foot traffic study, sunrise to noon</div>
+        <div class="card-meta-row"><span>No commentary · data viz at end</span><span>·</span><span>5 days ago</span></div>
+      </div>
+      <button class="eng-btn" id="eng-6">I watched this</button>
+    </div>
+
+    <!-- LOAD MORE -->
+    <div class="load-more-row" onclick="loadMore()">
+      <div class="lm-text">Load next from pool</div>
+      <div class="lm-sub" id="poolNote">Weighted random draw · 41 remaining</div>
+    </div>
+
+  </div><!-- end mainScroll -->
+</div><!-- end screen-main -->
+
+<!-- ═══════════════ EARN TAB ═══════════════ -->
+<div id="screen-earn" class="screen">
+  <div class="earn-header">
+    <div class="earn-title">Your earnings</div>
+    <div class="earn-sub">Ad revenue share · paid monthly · trees keeps 30%</div>
+  </div>
+
+  <div class="balance-card">
+    <div class="bal-label">March 2026 · Estimated</div>
+    <div class="bal-amount">$4.18</div>
+    <div class="bal-period">Mar 1 – 18 · 18 days in</div>
+    <div class="bal-pending">
+      <span class="bal-pend-label">Pending (prior months)</span>
+      <span class="bal-pend-val">$23.41</span>
+    </div>
+  </div>
+
+  <div class="earn-section">
+    <div class="earn-sec-title">How you get paid</div>
+    <div class="how-paid-card">
+      <div class="hp-title">Ad Revenue Share</div>
+      <div class="hp-row">
+        <div class="hp-icon">👁️</div>
+        <div class="hp-body">
+          <div class="hp-label">Impression revenue</div>
+          <div class="hp-detail">Ads shown alongside your content. Rate varies by locality and format.</div>
+        </div>
+        <div class="hp-rate">~$1.20<br><span style="font-size:10px;color:var(--dimmer);">per 1k views</span></div>
+      </div>
+      <div class="hp-row">
+        <div class="hp-icon">⏱️</div>
+        <div class="hp-body">
+          <div class="hp-label">Completion bonus</div>
+          <div class="hp-detail">Content read or watched to completion earns a 30% multiplier.</div>
+        </div>
+        <div class="hp-rate">+30%</div>
+      </div>
+      <div class="hp-row">
+        <div class="hp-icon">🔥</div>
+        <div class="hp-body">
+          <div class="hp-label">Torchbearer week</div>
+          <div class="hp-detail">3× distribution amplifier. All torchbearer content earns triple impressions.</div>
+        </div>
+        <div class="hp-rate">3×</div>
+      </div>
+      <div class="hp-row">
+        <div class="hp-icon">📖</div>
+        <div class="hp-body">
+          <div class="hp-label">Archive views</div>
+          <div class="hp-detail">Your archived content earns indefinitely. Annual yearbook release spikes views every Jan 1.</div>
+        </div>
+        <div class="hp-rate">ongoing</div>
+      </div>
+      <div class="hp-row">
+        <div class="hp-icon">🌱</div>
+        <div class="hp-body">
+          <div class="hp-label">Weekly streak bonus</div>
+          <div class="hp-detail">Post every week without missing. +5% per consecutive week, up to +50%.</div>
+        </div>
+        <div class="hp-rate">+5%/wk</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="earn-section">
+    <div class="earn-sec-title">Weekly breakdown</div>
+    <div class="weekly-log">
+      <div class="wl-row this-week">
+        <div class="wl-week">Mar 17</div>
+        <div class="wl-bar-wrap"><div class="wl-bar" style="width:22%;background:var(--amber2);"></div></div>
+        <div class="wl-amt" style="color:var(--amber2);">$0.92</div>
+      </div>
+      <div class="wl-row">
+        <div class="wl-week">Mar 10</div>
+        <div class="wl-bar-wrap"><div class="wl-bar" style="width:100%;"></div></div>
+        <div class="wl-amt">$3.26</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="earn-section">
+    <div class="earn-sec-title">Cash out</div>
+    <div class="cashout-card">
+      <div class="cashout-rule">Earnings over $10 are paid out monthly via Stripe, Venmo, or ACH bank transfer. Minimum payout is $10. trees takes 30% — 70% goes directly to you.</div>
+      <button class="cashout-btn" onclick="showToast('💸 Payout available when you reach $10')">Request payout · $23.41 available</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ARCHIVE TAB ═══════════════ -->
+<div id="screen-archive" class="screen">
+  <div class="archive-header">
+    <div class="archive-title">Archive</div>
+    <div class="archive-sub">Your community's permanent record</div>
+  </div>
+
+  <div class="yearbook-banner" onclick="showToast('📖 2025 Yearbook — released Jan 1, 2026')">
+    <div class="yb-year-num">2025</div>
+    <div class="yb-text">
+      <div class="yb-label">Annual Yearbook Release</div>
+      <div class="yb-name">Williamsburg · Year Two</div>
+      <div class="yb-detail">312 posts · 23 contributors · released Jan 1, 2026</div>
+    </div>
+  </div>
+
+  <div style="padding:0 16px 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);">2025 Archive</div>
+  <div class="archive-grid" id="archiveGrid"></div>
+</div>
+
+<!-- ═══════════════ PROFILE TAB ═══════════════ -->
+<div id="screen-profile" class="screen">
+  <div class="profile-header">
+    <div class="profile-avatar">🌱</div>
+    <div class="profile-name">Your Profile</div>
+    <div class="profile-tenure">Week 1 · Member since March 2026</div>
+    <div class="profile-week-ring" id="profileRing"></div>
+    <div class="profile-localities">
+      <div class="ploc-pill">🏠 Williamsburg</div>
+      <div class="ploc-pill">📍 LES</div>
+      <div class="ploc-pill">🎲 Jackson Hts</div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <div class="ps-title">Contribution wall</div>
+    <div class="contrib-wall">
+      <div class="cw-label">52 weeks · your activity</div>
+      <div class="cw-grid" id="contribGrid"></div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <div class="ps-title">Community tenure — Williamsburg</div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-bottom:10px;">Anonymous ranking · bars only</div>
+    <div id="tenureList"></div>
+  </div>
+
+  <div class="profile-section">
+    <div class="ps-title">Settings</div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div style="padding:12px 0;border-bottom:1px solid var(--bark2);font-size:14px;color:var(--mist);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="showToast('GPS: Currently active')">Location settings <span style="color:var(--leaf2);font-size:18px;">→</span></div>
+      <div style="padding:12px 0;border-bottom:1px solid var(--bark2);font-size:14px;color:var(--mist);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Payout settings <span style="color:var(--leaf2);font-size:18px;">→</span></div>
+      <div style="padding:12px 0;border-bottom:1px solid var(--bark2);font-size:14px;color:var(--mist);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="showToast('Re-roll available once per 90 days')">Swap discovery locality <span style="color:var(--leaf2);font-size:18px;">→</span></div>
+      <div style="padding:12px 0;font-size:14px;color:var(--soil);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Emeritus & portfolio export <span style="font-size:18px;">→</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" onclick="switchTab('main')" id="nav-main">
+    <div class="nav-icon">🌳</div>
+    <div class="nav-label">Feed</div>
+  </button>
+  <button class="nav-item" onclick="switchTab('archive')" id="nav-archive">
+    <div class="nav-icon">📖</div>
+    <div class="nav-label">Archive</div>
+  </button>
+  <div class="nav-post-wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <button class="nav-post-btn" onclick="openCompose()">+</button>
+      <div class="nav-post-label">Post</div>
+    </div>
+  </div>
+  <button class="nav-item" onclick="switchTab('earn')" id="nav-earn">
+    <div class="nav-icon">💵</div>
+    <div class="nav-label">Earn</div>
+  </button>
+  <button class="nav-item" onclick="switchTab('profile')" id="nav-profile">
+    <div class="nav-icon">🌱</div>
+    <div class="nav-label">You</div>
+  </button>
+</div>
+
+<!-- ═══════════════ COMPOSE SHEET ═══════════════ -->
+<div class="sheet-backdrop" id="composeBackdrop" onclick="closeCompose()"></div>
+<div class="compose-sheet" id="composeSheet">
+  <div class="compose-handle"></div>
+  <div class="compose-header">
+    <div class="compose-title">Post to Williamsburg</div>
+    <div class="compose-gps"><div class="compose-gps-dot"></div><span id="composeLocLabel">GPS verified</span></div>
+  </div>
+  <div class="compose-fmts">
+    <div class="cfmt sel" onclick="selCFmt(this)"><div class="cfmt-icon">▶</div><div class="cfmt-label">Short</div></div>
+    <div class="cfmt" onclick="selCFmt(this)"><div class="cfmt-icon">◻</div><div class="cfmt-label">Photos</div></div>
+    <div class="cfmt" onclick="selCFmt(this)"><div class="cfmt-icon">✎</div><div class="cfmt-label">Essay</div></div>
+    <div class="cfmt" onclick="selCFmt(this)"><div class="cfmt-icon">▶▶</div><div class="cfmt-label">Long</div></div>
+    <div class="cfmt" onclick="selCFmt(this)"><div class="cfmt-icon">◇</div><div class="cfmt-label">Event</div></div>
+  </div>
+  <div class="compose-body">
+    <div class="weekly-req-notice">🌱 Week 1 · Post this week to keep your streak and stay in the earnings pool.</div>
+    <div class="compose-upload" onclick="showToast('📁 File picker — connect in production')">
+      <div class="cup-icon">📁</div>
+      <div class="cup-label">Upload video, photos, or audio</div>
+      <div class="cup-sub">MP4, MOV, JPG, PNG, MP3 · max 500MB</div>
+    </div>
+    <textarea class="compose-ta" placeholder="What do you want to add to this place?" rows="3"></textarea>
+    <div class="compose-locality-tag">
+      <span>📍</span> Posting to: <strong>Williamsburg, Brooklyn</strong> · GPS confirmed
+    </div>
+    <button class="compose-post-btn" onclick="submitPost()">Publish to locality</button>
+  </div>
+</div>
+
+<!-- ═══════════════ CITATION SHEET ═══════════════ -->
+<div class="sheet-backdrop" id="citationBackdrop" onclick="closeCitations()"></div>
+<div class="modal-sheet" id="citationSheet">
+  <div class="modal-handle"></div>
+  <div class="modal-body">
+    <div class="modal-title">3 cross-community responses</div>
+    <div class="modal-sub">These posts cite yours from outside your locality. They can link to you — you cannot navigate into their feeds.</div>
+    <div class="citation-item">
+      <div class="ci-from">Crown Heights, Brooklyn · 18 wks</div>
+      <div class="ci-title">We have the same shop. It's a nail salon now.</div>
+      <div class="ci-excerpt">The place you described — we have its exact counterpart on Nostrand Ave. Same era. Same faded sign. It was a hardware store.</div>
+    </div>
+    <div class="citation-item">
+      <div class="ci-from">Jackson Heights, Queens · 9 wks</div>
+      <div class="ci-title">What "before" even means in a place that never had a before</div>
+      <div class="ci-excerpt">I keep reading people talk about what neighborhoods used to be. Jackson Heights was always changing — there's no stable point to point back to...</div>
+    </div>
+    <div class="citation-item">
+      <div class="ci-from">Astoria, Queens · 31 wks</div>
+      <div class="ci-title">A photograph, in response</div>
+      <div class="ci-excerpt">Photo board: the same faded sign, different street, same story. No caption needed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+</div><!-- end #app -->
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let userLat = null, userLon = null, userLocName = 'Unknown';
+let currentTab = 'main';
+let obStep = 0;
+
+// ══════════════════════════════════════
+// LOCATION
+// ══════════════════════════════════════
+function requestLocation() {
+  const btn = document.getElementById('btnRequestLoc');
+  const status = document.getElementById('locStatus');
+  const statusText = document.getElementById('locStatusText');
+  btn.textContent = '📍 Requesting access...';
+  btn.disabled = true;
+
+  if (!navigator.geolocation) {
+    statusText.textContent = 'Geolocation not supported — using default';
+    status.classList.add('show');
+    setTimeout(proceedAfterLocation, 1500);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+      // Reverse geocode via a free API
+      reverseGeocode(userLat, userLon).then(name => {
+        userLocName = name;
+        statusText.textContent = `📍 ${name} — verified`;
+        status.classList.add('show');
+        document.getElementById('homeLocName').textContent = name;
+        document.getElementById('topBarLoc').textContent = name.split(',')[0];
+        document.getElementById('composeLocLabel').textContent = 'GPS verified';
+        setTimeout(proceedAfterLocation, 1400);
+      });
+    },
+    (err) => {
+      const msgs = {1:'Location denied — posting disabled',2:'Location unavailable',3:'Request timed out'};
+      statusText.textContent = msgs[err.code] || 'Location error';
+      status.classList.add('show');
+      setTimeout(proceedAfterLocation, 1800);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`);
+    const d = await res.json();
+    const a = d.address;
+    // Build a nice neighborhood/city string
+    const hood = a.neighbourhood || a.suburb || a.quarter || a.city_district || '';
+    const city = a.city || a.town || a.village || '';
+    const state = a.state || '';
+    if (hood && city) return `${hood}, ${city}`;
+    if (city && state) return `${city}, ${state}`;
+    return d.display_name?.split(',').slice(0,2).join(',') || 'Your Area';
+  } catch {
+    return 'Your Neighborhood';
+  }
+}
+
+function skipLocation() {
+  userLocName = 'Your Neighborhood';
+  proceedAfterLocation();
+}
+
+function proceedAfterLocation() {
+  document.getElementById('screen-splash').classList.remove('active');
+  document.getElementById('screen-onboard').classList.add('active');
+  updateObProgress(0);
+}
+
+// ══════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════
+function obNext(n) {
+  document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-' + n).classList.add('active');
+  obStep = n;
+  updateObProgress(n);
+}
+
+function updateObProgress(n) {
+  const dots = document.querySelectorAll('.ob-prog-dot');
+  dots.forEach((d, i) => {
+    d.className = 'ob-prog-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+  });
+}
+
+function selectOb(card) {
+  card.closest('.ob-step').querySelectorAll('.ob-card').forEach(c => c.classList.remove('sel'));
+  card.classList.add('sel');
+}
+
+function enterApp() {
+  document.getElementById('screen-onboard').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.getElementById('bottomNav').style.display = 'flex';
+  initApp();
+}
+
+// ══════════════════════════════════════
+// APP INIT
+// ══════════════════════════════════════
+function initApp() {
+  renderContribGrid();
+  renderProfileRing();
+  renderTenureList();
+  renderArchive();
+  setupEngagement();
+  startGPSRefresh();
+}
+
+function startGPSRefresh() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(pos => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+    }, null, { enableHighAccuracy: false, timeout: 30000 });
+  }
+}
+
+// ══════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════
+function switchTab(tab) {
+  const screens = {
+    main: 'screen-main', earn: 'screen-earn',
+    archive: 'screen-archive', profile: 'screen-profile'
+  };
+  Object.entries(screens).forEach(([k, v]) => {
+    document.getElementById(v).classList.toggle('active', k === tab);
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + tab);
+  if (navEl) navEl.classList.add('active');
+  currentTab = tab;
+}
+
+// ══════════════════════════════════════
+// LOCALITY & FORMAT
+// ══════════════════════════════════════
+function setLocality(btn, loc) {
+  document.querySelectorAll('.loc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const names = {home:'Williamsburg', attach:'LES', discover:'Jackson Hts'};
+  showToast('📍 ' + btn.textContent.trim());
+}
+
+function setFmt(btn, fmt) {
+  document.querySelectorAll('.fp').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card[data-fmt]').forEach(card => {
+    card.style.display = (fmt === 'all' || card.dataset.fmt === fmt) ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════
+// COMPOSE
+// ══════════════════════════════════════
+function openCompose() {
+  document.getElementById('composeSheet').classList.add('open');
+  document.getElementById('composeBackdrop').classList.add('open');
+  // Update GPS status in compose
+  if (userLat) {
+    document.getElementById('composeLocLabel').textContent = `GPS active · ${userLocName.split(',')[0]}`;
+  }
+}
+function closeCompose() {
+  document.getElementById('composeSheet').classList.remove('open');
+  document.getElementById('composeBackdrop').classList.remove('open');
+}
+function selCFmt(el) {
+  el.closest('.compose-fmts').querySelectorAll('.cfmt').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function submitPost() {
+  closeCompose();
+  document.getElementById('contribNudge').style.display = 'none';
+  showToast('🌱 Posted to Williamsburg · Week 1');
+}
+
+// ══════════════════════════════════════
+// CITATIONS
+// ══════════════════════════════════════
+function openCitations(e) {
+  e.stopPropagation();
+  document.getElementById('citationSheet').classList.add('open');
+  document.getElementById('citationBackdrop').classList.add('open');
+}
+function closeCitations() {
+  document.getElementById('citationSheet').classList.remove('open');
+  document.getElementById('citationBackdrop').classList.remove('open');
+}
+
+// ══════════════════════════════════════
+// HIDDEN ENGAGEMENT
+// ══════════════════════════════════════
+function setupEngagement() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const card = entry.target;
+        if (!card._engTimer) {
+          card._engTimer = setTimeout(() => {
+            const btn = card.querySelector('.eng-btn');
+            if (btn) btn.classList.add('show');
+          }, 3200);
+        }
+      } else {
+        if (entry.target._engTimer) {
+          clearTimeout(entry.target._engTimer);
+          entry.target._engTimer = null;
+        }
+      }
+    });
+  }, { threshold: 0.65 });
+
+  document.querySelectorAll('.card').forEach(card => {
+    if (card.querySelector('.eng-btn')) observer.observe(card);
+  });
+
+  document.querySelectorAll('.eng-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.style.opacity = '0';
+      this.style.pointerEvents = 'none';
+      // Silent signal — would POST to backend
+      console.log('[trees] engagement signal · anonymous · card:', this.closest('.card')?.id);
+    });
+  });
+}
+
+// ══════════════════════════════════════
+// CONTRIBUTION WALL (Profile)
+// ══════════════════════════════════════
+function renderContribGrid() {
+  const grid = document.getElementById('contribGrid');
+  if (!grid) return;
+  const weeks = 52;
+  let html = '';
+  for (let i = 0; i < weeks; i++) {
+    if (i < 50) html += `<div class="cw-cell"></div>`;
+    else if (i === 50) html += `<div class="cw-cell filled high"></div>`;
+    else html += `<div class="cw-cell this-week" title="This week">1</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function renderProfileRing() {
+  const ring = document.getElementById('profileRing');
+  if (!ring) return;
+  let html = '';
+  for (let i = 0; i < 12; i++) {
+    html += `<div class="pwr-dot${i === 0 ? ' current' : ''}"></div>`;
+  }
+  ring.innerHTML = html;
+}
+
+function renderTenureList() {
+  const list = document.getElementById('tenureList');
+  if (!list) return;
+  const data = [
+    {wks:78, pct:100, em:true}, {wks:34, pct:44, torch:true},
+    {wks:22, pct:28}, {wks:16, pct:20}, {wks:12, pct:15},
+    {wks:7,  pct:9},  {wks:5,  pct:6},  {wks:1,  pct:1, you:true},
+  ];
+  list.innerHTML = data.map(r => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dotted var(--bark2);">
+      <span style="font-family:var(--font-mono);font-size:11px;color:${r.you ? 'var(--amber)' : r.em ? 'var(--soil)' : 'var(--moss)'};min-width:44px;">${r.wks} wks</span>
+      <div style="flex:1;height:3px;background:var(--bark2);border-radius:2px;">
+        <div style="width:${r.pct}%;height:100%;background:${r.you ? 'var(--amber)' : r.em ? 'var(--soil)' : 'var(--moss2)'};border-radius:2px;"></div>
+      </div>
+      <span style="font-size:12px;">${r.em ? '◎' : r.torch ? '🔥' : r.you ? '← you' : ''}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// ARCHIVE
+// ══════════════════════════════════════
+const ARC_POSTS = [
+  {fmt:'Essay',title:'The last hardware store on Bedford Ave',wk:'Wk 198',em:false},
+  {fmt:'Photos',title:'Winter on the Williamsburg Bridge',wk:'Wk 203',em:false},
+  {fmt:'Short',title:'4am: the only quiet hour',wk:'Wk 210',em:false},
+  {fmt:'Essay',title:'A year of attending the same community board meeting',wk:'Wk 214',em:false},
+  {fmt:'Long',title:'The ferry and who takes it: a study',wk:'Wk 219',em:false},
+  {fmt:'Essay',title:'The grocery store I photographed every week',wk:'Wk 221',em:true},
+  {fmt:'Event',title:'Bedford Ave Street Fair — organized locally',wk:'Wk 228',em:false},
+  {fmt:'Photos',title:'Fall: the neighborhood trees we never named',wk:'Wk 232',em:false},
+  {fmt:'Essay',title:'On the coffee shop that became a real estate office',wk:'Wk 238',em:false},
+  {fmt:'Short',title:'The last week of the Polish deli — 45 seconds',wk:'Wk 241',em:false},
+];
+function renderArchive() {
+  const grid = document.getElementById('archiveGrid');
+  if (!grid) return;
+  grid.innerHTML = ARC_POSTS.map(p => `
+    <div class="arc-card ${p.em ? 'emeritus' : ''}" onclick="showToast('📖 ${p.title.substring(0,30)}...')">
+      <div class="arc-fmt">${p.fmt}${p.em ? ' · ◎' : ''}</div>
+      <div class="arc-title">${p.title}</div>
+      <div class="arc-week">${p.wk} · 2025</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// LOAD MORE
+// ══════════════════════════════════════
+function loadMore() {
+  const note = document.getElementById('poolNote');
+  const n = parseInt(note.textContent.match(/\d+/)?.[0] || 41);
+  const next = Math.max(0, n - Math.floor(Math.random() * 7 + 3));
+  note.textContent = `Weighted random draw · ${next} remaining`;
+  showToast('🌳 Loading next batch from pool...');
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════
+// HIDE NAV DURING ONBOARD/SPLASH
+// ══════════════════════════════════════
+document.getElementById('bottomNav').style.display = 'none';
+
+// Prevent scroll propagation issues on iOS
+document.querySelectorAll('.feed, #screen-earn, #screen-archive, #screen-profile, #mainScroll').forEach(el => {
+  el.addEventListener('touchstart', () => {}, { passive: true });
+});
+</script>
+</body>
+</html>
