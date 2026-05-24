@@ -1,0 +1,498 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{width:100%;display:flex;flex-direction:column;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;font-family:var(--font-sans,system-ui);background:var(--color-background-primary)}
+#top{display:grid;grid-template-columns:1fr 256px;height:460px}
+#cvwrap{position:relative;background:#0c0f14}
+canvas{display:block;width:100%;height:100%;cursor:default}
+#right{border-left:0.5px solid var(--color-border-tertiary);padding:12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+#bottom{border-top:0.5px solid var(--color-border-tertiary);padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.sh{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-secondary);margin-bottom:3px}
+.row{display:flex;align-items:center;gap:7px}
+.row label{font-size:11px;color:var(--color-text-secondary);min-width:54px;flex-shrink:0}
+.vv{font-size:11px;font-weight:500;min-width:36px;text-align:right;color:var(--color-text-primary)}
+input[type=range]{flex:1;min-width:0}
+.presets{display:flex;gap:3px;flex-wrap:wrap}
+.pb{font-size:10px;padding:2px 8px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.pb.on{background:var(--color-background-info);color:var(--color-text-info);border-color:transparent}
+.nurow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.nc{border-radius:7px;padding:7px 6px 5px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);text-align:center}
+.nl{font-size:9px;color:var(--color-text-secondary);margin-bottom:2px}
+.nv{font-size:15px;font-weight:500}
+.aux{color:#1d9e75}.pos{color:#d85a30}.zer{color:var(--color-text-tertiary)}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:20px}
+.badge.aux{background:#e1f5ee;color:#085041}
+.badge.pos{background:#faece7;color:#4a1b0c}
+.badge.zer{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.statsrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.stat .sl{font-size:10px;color:var(--color-text-secondary)}
+.stat .sv{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.lgnd{display:flex;flex-direction:column;gap:4px}
+.li{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--color-text-secondary)}
+.ld{width:22px;height:3px;border-radius:2px;flex-shrink:0}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ldash{width:22px;height:0;border-top:2px dashed;flex-shrink:0;opacity:.7}
+</style>
+
+<div id="app">
+<div id="top">
+  <div id="cvwrap"><canvas id="c"></canvas></div>
+  <div id="right">
+
+    <div>
+      <div class="sh">Shape</div>
+      <div class="presets" id="presets">
+        <button class="pb on" data-p="equilateral">Equilateral</button>
+        <button class="pb" data-p="isosceles">Isosceles</button>
+        <button class="pb" data-p="scalene">Scalene</button>
+        <button class="pb" data-p="right">Right</button>
+        <button class="pb" data-p="flat">Flat</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sh">C — inner triangle</div>
+      <div class="row"><label>C</label><input type="range" id="csl" min="0.05" max="0.93" step="0.01" value="0.40"><span class="vv" id="cv">0.40</span></div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;line-height:1.5">Low = large hinges · High = stiff</div>
+    </div>
+
+    <div>
+      <div class="sh">Load angle θ</div>
+      <div class="row"><label>θ</label><input type="range" id="angsl" min="0" max="179" step="1" value="90"><span class="vv" id="angv">90°</span></div>
+    </div>
+
+    <div>
+      <div class="sh">ν per edge</div>
+      <div class="nurow" id="nurow"></div>
+    </div>
+
+    <div>
+      <div class="sh">Behavior</div>
+      <div id="behavbox"></div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:5px;line-height:1.5" id="behavnote"></div>
+    </div>
+
+    <div>
+      <div class="sh">Legend</div>
+      <div class="lgnd">
+        <div class="li"><div class="ld" style="background:#7f77dd;opacity:.35;border-top:1.5px dashed #7f77dd"></div>Original triangle</div>
+        <div class="li"><div class="ld" style="background:#1d9e75"></div>Deformed triangle</div>
+        <div class="li"><div class="ld" style="background:#ef9f27"></div>Inner triangle I (from C)</div>
+        <div class="li"><div class="ldot" style="background:#ef9f27"></div>T₀ T₁ T₂ — inner vertices</div>
+        <div class="li"><div class="ldot" style="background:#5dcaa5"></div>S — centroid</div>
+        <div class="li"><div class="ld" style="background:#8b82e8;opacity:.5;border-top:1px dashed #8b82e8"></div>H₀ region (around P₀)</div>
+        <div class="li"><div class="ld" style="background:#2ab88a;opacity:.5;border-top:1px dashed #2ab88a"></div>H₁ region (around P₁)</div>
+        <div class="li"><div class="ld" style="background:#e07550;opacity:.5;border-top:1px dashed #e07550"></div>H₂ region (around P₂)</div>
+        <div class="li"><div class="ldot" style="background:#c084fc"></div>PA PB PC — neighbor 4th pts</div>
+        <div class="li"><span style="font-size:11px;color:#1d9e75;font-weight:500;min-width:22px">ν&lt;0</span>Edge is auxetic (expands)</div>
+        <div class="li"><span style="font-size:11px;color:#d85a30;font-weight:500;min-width:22px">ν&gt;0</span>Edge is conventional</div>
+        <div class="li"><div class="ldash" style="border-color:#c084fc"></div>Curved Bézier smoothing</div>
+        <div class="li"><span style="font-size:11px;color:rgba(255,255,255,.45);min-width:22px">↗ε</span>Applied load direction</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="bottom">
+  <div class="statsrow">
+    <div class="stat"><div class="sl">ε axial</div><div class="sv" id="s-ax">—</div></div>
+    <div class="stat"><div class="sl">ε transverse</div><div class="sv" id="s-tr">—</div></div>
+    <div class="stat"><div class="sl">Area ratio</div><div class="sv" id="s-ar">—</div></div>
+    <div class="stat"><div class="sl">ν bbox</div><div class="sv" id="s-nu">—</div></div>
+    <div class="stat"><div class="sl">Delaunay</div><div class="sv" id="s-del">—</div></div>
+    <div class="stat"><div class="sl">Inner rotation ω</div><div class="sv" id="s-om">—</div></div>
+    <div style="flex:1"></div>
+    <div style="font-size:10px;color:var(--color-text-secondary)">Drag <span style="color:#8b82e8">●</span> vertices to reshape</div>
+  </div>
+</div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W=0,H=0;
+
+const ST={pts:null,C:.40,angle:90,drag:null,shape:'equilateral'};
+
+function mkPreset(key){
+  const cx=W/2,cy=H/2,r=Math.min(W,H)*.30;
+  const p={
+    equilateral:[[cx,cy-r],[cx+r*Math.sin(2*Math.PI/3),cy-r*Math.cos(2*Math.PI/3)],[cx+r*Math.sin(4*Math.PI/3),cy-r*Math.cos(4*Math.PI/3)]],
+    isosceles:[[cx,cy-r*1.05],[cx+r*.52,cy+r*.68],[cx-r*.52,cy+r*.68]],
+    scalene:[[cx-.05*r,cy-r],[cx+r*.92,cy+r*.52],[cx-r*.78,cy+r*.62]],
+    right:[[cx-r*.82,cy-r*.72],[cx+r*.82,cy+r*.62],[cx-r*.82,cy+r*.62]],
+    flat:[[cx-r,cy+r*.08],[cx+r,cy+r*.22],[cx,cy-r*.32]],
+  };
+  return(p[key]||p.equilateral).map(v=>[...v]);
+}
+
+const va=(a,b)=>[a[0]+b[0],a[1]+b[1]];
+const vs=(a,b)=>[a[0]-b[0],a[1]-b[1]];
+const vsc=(a,s)=>[a[0]*s,a[1]*s];
+const vd=(a,b)=>a[0]*b[0]+a[1]*b[1];
+const vl=a=>Math.sqrt(vd(a,a));
+const vn=a=>{const l=vl(a);return l<1e-12?[0,0]:vsc(a,1/l);};
+const vp=a=>[-a[1],a[0]];
+const vmid=ps=>{let x=0,y=0;ps.forEach(p=>{x+=p[0];y+=p[1]});return[x/ps.length,y/ps.length]};
+const vlrp=(a,b,t)=>va(vsc(a,1-t),vsc(b,t));
+const vcr=(a,b)=>a[0]*b[1]-a[1]*b[0];
+const triArea=P=>Math.abs(vcr(vs(P[1],P[0]),vs(P[2],P[0])))/2;
+
+// ---- Inner triangle ----
+function getInner(P,C){
+  const S=vmid(P);
+  const T=P.map(p=>va(vsc(S,C),vsc(p,1-C)));
+  return{S,T};
+}
+
+// ---- Compute real neighbor 4th points ----
+// Each edge of T has one neighbor triangle sharing that edge.
+// The 4th point of that neighbor is the reflection of the opposite vertex
+// through the edge, scaled to match the triangle's "reach" —
+// this correctly places PA, PB, PC as the Delaunay neighbors would be.
+function getNeighbors(P){
+  // edge 0: P0-P1, opposite P2 → neighbor 4th pt PA reflects P2 through edge P0-P1
+  // edge 1: P1-P2, opposite P0 → PB reflects P0 through edge P1-P2
+  // edge 2: P0-P2, opposite P1 → PC reflects P1 through edge P0-P2
+  const edges=[[0,1,2],[1,2,0],[0,2,1]];
+  return edges.map(([a,b,opp])=>{
+    const ea=P[a],eb=P[b],po=P[opp];
+    const edgeDir=vn(vs(eb,ea));
+    const edgeMid=vlrp(ea,eb,.5);
+    // Project opposite vertex onto edge
+    const proj=va(ea,vsc(edgeDir,vd(vs(po,ea),edgeDir)));
+    // Reflect through edge
+    const reflected=va(po,vsc(vs(proj,po),2));
+    // The neighbor's 4th point sits at the reflected position
+    // (this is exact for the Delaunay circumcircle condition in the equilateral case
+    //  and a valid approximation for arbitrary triangles)
+    return reflected;
+  });
+}
+
+// ---- Kinematic derivation (no assumed nu) ----
+function kinematic(P,C,angleDeg){
+  const{S,T}=getInner(P,C);
+  const cP=vmid(P);
+  const ang=angleDeg*Math.PI/180;
+  const u=[Math.cos(ang),Math.sin(ang)];
+
+  const ki=P.map(p=>{const d=vl(vs(p,S));return Math.max((1-C)*(1-C)*d*d,1e-8);});
+  const kSum=ki.reduce((a,b)=>a+b,0);
+  const wi=ki.map(k=>k/kSum);
+
+  const dP=P.map(p=>vsc(u,vd(vs(p,cP),u)));
+  const dS=[wi[0]*dP[0][0]+wi[1]*dP[1][0]+wi[2]*dP[2][0],
+             wi[0]*dP[0][1]+wi[1]*dP[1][1]+wi[2]*dP[2][1]];
+
+  let tau=0,Izz=0;
+  for(let i=0;i<3;i++){
+    const r=vs(T[i],S);
+    const df=vs(dP[i],dS);
+    tau+=wi[i]*vcr(r,df);
+    Izz+=wi[i]*(r[0]*r[0]+r[1]*r[1]);
+  }
+  const omega=Izz>1e-10?tau/Izz:0;
+
+  const dT=T.map(ti=>{
+    const r=vs(ti,S);
+    return va(dS,[-omega*r[1],omega*r[0]]);
+  });
+
+  const Peff=P.map((p,i)=>{
+    const hinge=vs(p,T[i]);
+    const dhinge=vs(dP[i],dT[i]);
+    const hdir=vn(hinge);
+    const stretch=vd(dhinge,hdir);
+    return va(va(T[i],dT[i]),va(hinge,vsc(hdir,stretch)));
+  });
+
+  const edges=[[0,1],[1,2],[0,2]];
+  const edgeData=edges.map(([a,b])=>{
+    const ev=vn(vs(P[b],P[a]));
+    const l0=vl(vs(P[b],P[a]));
+    const l1=vl(vs(Peff[b],Peff[a]));
+    const eEdge=(l1-l0)/l0;
+    const along=Math.abs(vd(ev,u));
+    const trans=Math.sqrt(Math.max(0,1-along*along));
+    const nu=trans>0.15?-eEdge/1.0:null;
+    return{a,b,l0,l1,eEdge,nu,along,trans};
+  });
+
+  const exts=P.map(p=>vd(p,u));
+  const extsD=Peff.map(p=>vd(p,u));
+  const pu=vp(u);
+  const extsP=P.map(p=>vd(p,pu));
+  const extsPD=Peff.map(p=>vd(p,pu));
+  const eAx=((Math.max(...extsD)-Math.min(...extsD))-(Math.max(...exts)-Math.min(...exts)))/(Math.max(...exts)-Math.min(...exts)+1e-10);
+  const eTr=((Math.max(...extsPD)-Math.min(...extsPD))-(Math.max(...extsP)-Math.min(...extsP)))/(Math.max(...extsP)-Math.min(...extsP)+1e-10);
+  const nuBBox=Math.abs(eAx)>1e-6?-eTr/eAx:0;
+  const A0=triArea(P),A1=triArea(Peff);
+
+  return{S,T,dP,dT,Peff,edgeData,eAx,eTr,nuBBox,A0,A1,u,omega,wi};
+}
+
+// ---- Bezier smoothing curves (from algorithm) ----
+function bezierCurves(P,T,S){
+  const curves=[];
+  for(let i=0;i<3;i++){
+    const ti=T[i];
+    const j=(i+1)%3,k=(i+2)%3;
+    const qpts=[vlrp(ti,T[j],.42),vlrp(ti,T[k],.42),vlrp(P[i],P[j],.38),vlrp(P[i],P[k],.38)];
+    for(const q of qpts){
+      const jpt=vlrp(ti,q,.25);
+      const N=10,pts=[];
+      for(let n=0;n<=N;n++){const z=n/N;pts.push(va(va(vsc(jpt,(1-z)*(1-z)),vsc(ti,2*(1-z)*z)),vsc(q,z*z)));}
+      curves.push({pts,ci:i});
+    }
+  }
+  return curves;
+}
+
+function checkDelaunay(P){
+  const el=[[0,1],[1,2],[0,2]].map(([a,b])=>vl(vs(P[b],P[a])));
+  if(triArea(P)<200)return'degenerate';
+  if(Math.max(...el)/Math.min(...el)>5)return'poor';
+  return'ok';
+}
+
+// ---- colors ----
+const VCOLS=['#8b82e8','#2ab88a','#e07550'];
+const ELBLS=['E₀₁','E₁₂','E₀₂'];
+
+function rgb(h){return`${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;}
+
+// ---- Draw ----
+function draw(){
+  const cw=cv.offsetWidth,ch=cv.offsetHeight;
+  cv.width=cw*devicePixelRatio;cv.height=ch*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.clearRect(0,0,cw,ch);
+  if(!ST.pts)return;
+
+  const P=ST.pts;
+  const res=kinematic(P,ST.C,ST.angle);
+  const{S,T,Peff,edgeData,eAx,eTr,nuBBox,A0,A1,u,omega}=res;
+  const neighbors=getNeighbors(P);
+  const visS=32;
+  const Pvis=P.map((p,i)=>va(p,vsc(vs(Peff[i],p),visS)));
+  const Tvis=T.map((t,i)=>va(t,vsc(res.dT[i],visS)));
+
+  // ---- Neighbor triangles (faint fill) ----
+  neighbors.forEach((nb,k)=>{
+    const ea=[0,1,0][k],eb=[1,2,2][k];
+    const col=rgb(VCOLS[k]);
+    ctx.beginPath();
+    ctx.moveTo(P[ea][0],P[ea][1]);
+    ctx.lineTo(P[eb][0],P[eb][1]);
+    ctx.lineTo(nb[0],nb[1]);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${col},.04)`;ctx.fill();
+    ctx.strokeStyle=`rgba(${col},.20)`;ctx.lineWidth=.8;ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+  });
+
+  // ---- Outer triangle (ghost) ----
+  ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);P.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+  ctx.fillStyle='rgba(127,119,221,.05)';ctx.fill();
+  ctx.strokeStyle='rgba(127,119,221,.28)';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+
+  // ---- Deformed outer triangle ----
+  ctx.beginPath();ctx.moveTo(Pvis[0][0],Pvis[0][1]);Pvis.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+  ctx.fillStyle='rgba(93,202,165,.06)';ctx.fill();
+  ctx.strokeStyle='rgba(93,202,165,.70)';ctx.lineWidth=2;ctx.stroke();
+
+  // ---- H polyhedron regions ----
+  for(let i=0;i<3;i++){
+    const j=(i+1)%3,k=(i+2)%3;
+    const col=rgb(VCOLS[i]);
+    const mij=vlrp(P[i],P[j],.40);
+    const mik=vlrp(P[i],P[k],.40);
+    const tij=vlrp(T[i],T[j],.40);
+    const tik=vlrp(T[i],T[k],.40);
+    ctx.beginPath();
+    ctx.moveTo(P[i][0],P[i][1]);
+    ctx.lineTo(mij[0],mij[1]);ctx.lineTo(tij[0],tij[1]);
+    ctx.lineTo(T[i][0],T[i][1]);
+    ctx.lineTo(tik[0],tik[1]);ctx.lineTo(mik[0],mik[1]);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${col},.09)`;ctx.fill();
+    ctx.strokeStyle=`rgba(${col},.30)`;ctx.lineWidth=.8;ctx.setLineDash([2,2]);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  // ---- Bezier smoothing curves ----
+  bezierCurves(P,T,S).forEach(({pts,ci})=>{
+    const col=rgb('#c084fc');
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));
+    ctx.strokeStyle=`rgba(${col},.40)`;ctx.lineWidth=1.0;ctx.setLineDash([2,2]);ctx.stroke();ctx.setLineDash([]);
+  });
+
+  // ---- Hinge lines Pi→Ti ----
+  for(let i=0;i<3;i++){
+    const col=rgb(VCOLS[i]);
+    ctx.strokeStyle=`rgba(${col},.22)`;ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(P[i][0],P[i][1]);ctx.lineTo(T[i][0],T[i][1]);ctx.stroke();
+  }
+
+  // ---- Inner triangle ----
+  ctx.beginPath();ctx.moveTo(T[0][0],T[0][1]);T.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+  ctx.fillStyle='rgba(239,159,39,.10)';ctx.fill();
+  ctx.strokeStyle='rgba(239,159,39,.80)';ctx.lineWidth=1.5;ctx.stroke();
+
+  // ---- Deformed inner triangle (faint) ----
+  ctx.beginPath();ctx.moveTo(Tvis[0][0],Tvis[0][1]);Tvis.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+  ctx.strokeStyle='rgba(239,159,39,.28)';ctx.lineWidth=1;ctx.setLineDash([2,2]);ctx.stroke();ctx.setLineDash([]);
+
+  // ---- Neighbor 4th points (PA PB PC) ----
+  const nbLbls=['PA','PB','PC'];
+  neighbors.forEach((nb,k)=>{
+    ctx.beginPath();ctx.arc(nb[0],nb[1],5,0,2*Math.PI);
+    ctx.fillStyle='rgba(192,132,252,.75)';ctx.fill();
+    ctx.fillStyle='rgba(192,132,252,.85)';ctx.font='500 10px system-ui';
+    ctx.textAlign='center';
+    ctx.fillText(nbLbls[k],nb[0],nb[1]-9);
+    ctx.textAlign='left';
+    // Line from each neighbor to the shared edge midpoint
+    const ea=[0,1,0][k],eb=[1,2,2][k];
+    const em=vlrp(P[ea],P[eb],.5);
+    ctx.strokeStyle='rgba(192,132,252,.20)';ctx.lineWidth=.7;
+    ctx.beginPath();ctx.moveTo(nb[0],nb[1]);ctx.lineTo(em[0],em[1]);ctx.stroke();
+  });
+
+  // ---- Load axis arrow ----
+  const cP=vmid(P);
+  const axL=Math.min(W,H)*.13;
+  const ax0=vs(cP,vsc(u,axL)),ax1=va(cP,vsc(u,axL));
+  ctx.strokeStyle='rgba(255,255,255,.38)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(ax0[0],ax0[1]);ctx.lineTo(ax1[0],ax1[1]);ctx.stroke();
+  const ad=vn(u);
+  ctx.fillStyle='rgba(255,255,255,.38)';
+  ctx.beginPath();ctx.moveTo(ax1[0],ax1[1]);
+  ctx.lineTo(ax1[0]-8*ad[0]+3.5*ad[1],ax1[1]-8*ad[1]-3.5*ad[0]);
+  ctx.lineTo(ax1[0]-8*ad[0]-3.5*ad[1],ax1[1]-8*ad[1]+3.5*ad[0]);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.40)';ctx.font='bold 11px system-ui';ctx.textAlign='center';
+  ctx.fillText('ε',ax1[0]+9*ad[0],ax1[1]+9*ad[1]+4);
+  ctx.textAlign='left';
+
+  // ---- Displacement arrows ----
+  for(let i=0;i<3;i++){
+    const d=vs(Pvis[i],P[i]);
+    if(vl(d)<2)continue;
+    const col=rgb(VCOLS[i]);
+    ctx.strokeStyle=`rgba(${col},.85)`;ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(P[i][0],P[i][1]);ctx.lineTo(Pvis[i][0],Pvis[i][1]);ctx.stroke();
+    const dn=vn(d);
+    ctx.fillStyle=`rgba(${col},.85)`;
+    ctx.beginPath();ctx.moveTo(Pvis[i][0],Pvis[i][1]);
+    ctx.lineTo(Pvis[i][0]-8*dn[0]+3.5*dn[1],Pvis[i][1]-8*dn[1]-3.5*dn[0]);
+    ctx.lineTo(Pvis[i][0]-8*dn[0]-3.5*dn[1],Pvis[i][1]-8*dn[1]+3.5*dn[0]);
+    ctx.closePath();ctx.fill();
+  }
+
+  // ---- Edge coloring + ν labels ----
+  [[0,1],[1,2],[0,2]].forEach(([a,b],k)=>{
+    const{nu}=edgeData[k];
+    if(nu===null)return;
+    const col=nu<-0.05?'#2ab88a':nu>0.05?'#e07550':'#888780';
+    ctx.strokeStyle=col+'99';ctx.lineWidth=2.8;
+    ctx.beginPath();ctx.moveTo(P[a][0],P[a][1]);ctx.lineTo(P[b][0],P[b][1]);ctx.stroke();
+    const m=vmid([P[a],P[b]]);
+    const ev=vn(vs(P[b],P[a]));
+    const off=vsc(vp(ev),17);
+    ctx.fillStyle=col;ctx.font='bold 11px system-ui';ctx.textAlign='center';
+    ctx.fillText(`ν=${nu.toFixed(2)}`,m[0]+off[0],m[1]+off[1]);
+    ctx.textAlign='left';
+  });
+
+  // ---- Inner vertices T₀ T₁ T₂ ----
+  T.forEach((t,i)=>{
+    ctx.beginPath();ctx.arc(t[0],t[1],3.5,0,2*Math.PI);
+    ctx.fillStyle='#ef9f27';ctx.fill();
+    ctx.fillStyle='rgba(239,159,39,.75)';ctx.font='500 10px system-ui';
+    ctx.fillText(`T${i}`,t[0]+5,t[1]-4);
+  });
+
+  // ---- Centroid S ----
+  ctx.beginPath();ctx.arc(S[0],S[1],4.5,0,2*Math.PI);
+  ctx.fillStyle='#5dcaa5';ctx.fill();
+  ctx.fillStyle='rgba(93,202,165,.8)';ctx.font='10px system-ui';
+  ctx.fillText('S',S[0]+6,S[1]-4);
+
+  // ---- Outer vertices P₀ P₁ P₂ ----
+  const vLbls=['P₀','P₁','P₂'];
+  P.forEach((p,i)=>{
+    ctx.beginPath();ctx.arc(p[0],p[1],8,0,2*Math.PI);
+    ctx.fillStyle=`rgba(${rgb(VCOLS[i])},.90)`;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='white';ctx.font='500 11px system-ui';
+    ctx.fillText(vLbls[i],p[0]+11,p[1]+4);
+    // deformed dot
+    ctx.beginPath();ctx.arc(Pvis[i][0],Pvis[i][1],4,0,2*Math.PI);
+    ctx.fillStyle=`rgba(${rgb(VCOLS[i])},.50)`;ctx.fill();
+  });
+
+  // ---- Sidebar update ----
+  const nuDisp=edgeData.map(({nu},k)=>{
+    const v=nu===null?null:nu;
+    const cls=v===null?'zer':v<-0.05?'aux':v>0.05?'pos':'zer';
+    return`<div class="nc"><div class="nl">${ELBLS[k]}</div><div class="nv ${cls}">${v===null?'—':v.toFixed(3)}</div></div>`;
+  }).join('');
+  document.getElementById('nurow').innerHTML=nuDisp;
+
+  const allNu=edgeData.map(e=>e.nu).filter(v=>v!==null);
+  const auxC=allNu.filter(v=>v<-0.05).length;
+  const posC=allNu.filter(v=>v>0.05).length;
+  const beh=auxC>posC?'aux':posC>auxC?'pos':'zer';
+  const behTxt=beh==='aux'?'Auxetic':beh==='pos'?'Conventional':'Near-zero';
+  document.getElementById('behavbox').innerHTML=`<span class="badge ${beh}">${behTxt}</span>`;
+  const note=beh==='aux'
+    ?`${auxC}/3 edges expand laterally. Inner triangle rotates (ω=${omega.toFixed(3)}) — that rotation is what produces the auxetic response.`
+    :beh==='pos'
+    ?`Narrows when stretched. Try lower C or a more symmetric shape.`
+    :`At the transition between auxetic and conventional. Small changes in C or shape will tip it either way.`;
+  document.getElementById('behavnote').textContent=note;
+
+  document.getElementById('s-ax').textContent=eAx.toFixed(4);
+  document.getElementById('s-tr').textContent=eTr.toFixed(4);
+  document.getElementById('s-ar').textContent=(A1/A0).toFixed(4);
+  const nc2=nuBBox<-0.05?'aux':nuBBox>0.05?'pos':'zer';
+  document.getElementById('s-nu').innerHTML=`<span class="${nc2}">${nuBBox.toFixed(3)}</span>`;
+  document.getElementById('s-om').textContent=omega.toFixed(4)+' rad';
+  const del=checkDelaunay(P);
+  const delEl=document.getElementById('s-del');
+  delEl.textContent=del==='ok'?'✓ Good':del==='poor'?'⚠ Poor':'⚠ Degen';
+  delEl.style.color=del==='ok'?'var(--color-text-success)':'var(--color-text-danger)';
+}
+
+// ---- Interaction ----
+function nearV(x,y,r=16){let bi=-1,bd=Infinity;ST.pts.forEach((p,i)=>{const d=vl(vs([x,y],p));if(d<bd&&d<r){bd=d;bi=i;}});return bi;}
+function eXY(e){const r=cv.getBoundingClientRect(),s=cv.width/devicePixelRatio/r.width;return[(e.clientX-r.left)*s,(e.clientY-r.top)*s];}
+cv.addEventListener('mousedown',e=>{const[x,y]=eXY(e);ST.drag=nearV(x,y);if(ST.drag>=0)cv.style.cursor='grabbing';});
+cv.addEventListener('mousemove',e=>{const[x,y]=eXY(e);if(ST.drag!==null&&ST.drag>=0){ST.pts[ST.drag]=[x,y];draw();}else cv.style.cursor=nearV(x,y)>=0?'grab':'default';});
+cv.addEventListener('mouseup',()=>{ST.drag=null;cv.style.cursor='default';});
+cv.addEventListener('mouseleave',()=>{ST.drag=null;});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const[x,y]=eXY(e.touches[0]);ST.drag=nearV(x,y,22);},{passive:false});
+cv.addEventListener('touchmove',e=>{if(ST.drag<0)return;e.preventDefault();const[x,y]=eXY(e.touches[0]);ST.pts[ST.drag]=[x,y];draw();},{passive:false});
+cv.addEventListener('touchend',()=>{ST.drag=null;});
+
+// ---- Controls ----
+function sl(id,oid,fmt,cb){const el=document.getElementById(id),vo=document.getElementById(oid);el.addEventListener('input',()=>{const v=parseFloat(el.value);vo.textContent=fmt(v);cb(v);draw();});}
+sl('csl','cv',v=>v.toFixed(2),v=>{ST.C=v});
+sl('angsl','angv',v=>Math.round(v)+'°',v=>{ST.angle=v});
+document.querySelectorAll('#presets .pb').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#presets .pb').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');ST.shape=b.dataset.p;ST.pts=mkPreset(b.dataset.p);draw();
+  });
+});
+
+function init(){
+  const wrap=document.getElementById('cvwrap');
+  W=wrap.offsetWidth;H=wrap.offsetHeight;
+  if(W<10||H<10)return;
+  ST.pts=mkPreset(ST.shape);
+  draw();
+}
+new ResizeObserver(init).observe(document.getElementById('cvwrap'));
+setTimeout(init,30);
+</script>
